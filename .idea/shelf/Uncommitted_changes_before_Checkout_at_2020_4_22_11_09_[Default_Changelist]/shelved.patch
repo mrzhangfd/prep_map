@@ -1,0 +1,666 @@
+Index: pyqt5/photo_window.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># -*- coding: utf-8 -*-\r\n# @Time    : 2019/1/9 11:34\r\n# @Author  : Bo\r\n# @Email   : mat_wu@163.com\r\n# @File    : photo_window.py\r\n# @Software: PyCharm\r\nfrom pickle import dumps\r\nfrom numpy import array, fromfile, uint8, zeros, square, math, int32,ones\r\nimport cv2 as cv\r\nfrom re import findall\r\nfrom PyQt5.QtWidgets import QPushButton, QLineEdit, QHBoxLayout, QVBoxLayout, QFileDialog, QWidget, QGraphicsView, \\\r\n    QApplication\r\nfrom PyQt5.QtCore import Qt\r\nfrom PyQt5.QtGui import QIcon, QImage, QPixmap\r\nfrom baidu_ocr import BaiDuAPI\r\nfrom photo_viewer import PhotoViewer\r\nfrom mysql_conn import MySqlConn\r\nfrom color_list import get_corlor_list\r\nfrom matplotlib import pyplot as plt\r\n\r\n\r\nclass Window(QWidget):\r\n    def __init__(self):\r\n        super(Window,self).__init__()\r\n        self.init_WINDOW()\r\n\r\n    def init_WINDOW(self):\r\n        # 存储加载的图片和抽取的轮廓\r\n        self.image = array([])\r\n        self.cnt = array([])\r\n        self.color_dict = get_corlor_list()\r\n        self.choosePoints = []\r\n        self.ocr_flag = False\r\n        # 鼠标点击坐标和鼠标释放坐标\r\n        self.x_clicked = 0\r\n        self.y_clicked = 0\r\n        self.x_released = 0\r\n        self.y_released = 0\r\n\r\n        self.fnmae = '' #加载的map\r\n        self.baidu_api = BaiDuAPI()\r\n\r\n        # 图片图元\r\n        self.viewer = PhotoViewer(self)\r\n\r\n        # UI初始化\r\n\r\n        # 'Load image' button\r\n        self.btnLoad = QPushButton(self)\r\n        self.btnLoad.setText('图片加载')\r\n        # self.btnLoad.setText('Img Load')\r\n        self.btnLoad.clicked.connect(self.loadImage)\r\n\r\n        self.editYearInfo = QLineEdit(self)\r\n        self.editYearInfo.setPlaceholderText('时间')\r\n\r\n        # Button to change from drag/pan to getting pixel info\r\n        self.btnClickDrag = QPushButton(self)\r\n        self.btnClickDrag.setText('点击/拖拽')\r\n        self.btnClickDrag.setIcon(QIcon(\"image/dragIcon.png\"))\r\n        self.btnClickDrag.clicked.connect(self.clickDrag)\r\n\r\n        # 点击处的信息\r\n        self.editClickInfo = QLineEdit(self)\r\n        self.editClickInfo.setReadOnly(True)\r\n        self.viewer.mouse_clicked.connect(self.photoClicked)#自建的鼠标点击的传递信号连接photoClicked函数\r\n\r\n        # 轮廓生成按钮，连接轮廓生成函数\r\n        self.btnContour = QPushButton(self)\r\n        self.btnContour.setText('轮廓生成')\r\n        self.btnContour.clicked.connect(self.getContour)\r\n\r\n        # 轮廓拖动按钮，连接轮廓拖动函数\r\n        self.btnDrag = QPushButton(self)\r\n        self.btnDrag.setText(\"轮廓拖拽\")\r\n        self.btnDrag.clicked.connect(self.dragOutline)\r\n        self.viewer.mouse_released.connect(self.mouse_releasePoint)#自建鼠标松开信号连接了两个函数\r\n        self.viewer.mouse_released.connect(self.contourDraged)\r\n\r\n        # 获取轮廓信息的按钮\r\n        self.btnContourInfo = QPushButton(self)\r\n        self.btnContourInfo.setText(\"轮廓信息\")\r\n        # self.btnContourInfo.setText(\"Contour Info\")\r\n        self.btnContourInfo.clicked.connect(self.contour_info)\r\n\r\n        # 显示轮廓的信息\r\n        self.editcontourName = QLineEdit(self)\r\n        self.editcontourName.setPlaceholderText('轮廓名称')\r\n        # self.editcontourName.setPlaceholderText('Contour Name')\r\n\r\n        self.editContourArea = QLineEdit(self)\r\n        self.editContourArea.setReadOnly(True)\r\n        self.editContourArea.setPlaceholderText(\"轮廓面积\")\r\n        # self.editContourArea.setPlaceholderText(\"Area\")\r\n        self.editContourPerimeter = QLineEdit(self)\r\n        self.editContourPerimeter.setReadOnly(True)\r\n        self.editContourPerimeter.setPlaceholderText(\"轮廓周长\")\r\n        self.editContourCentre = QLineEdit(self)\r\n        self.editContourCentre.setPlaceholderText(\"轮廓重心\")\r\n        self.editContourCentre.setReadOnly(True)\r\n\r\n        # 存储轮廓的信息\r\n        self.btnContourSave = QPushButton(self)\r\n        self.btnContourSave.setText(\"存储轮廓信息\")\r\n        # self.btnContourSave.setText(\"Store Profile Information\")\r\n        self.btnContourSave.clicked.connect(self.save_contour)\r\n\r\n\r\n        # 地点识别\r\n        self.btnSite = QPushButton(self)\r\n        self.btnSite.setText(\"地点选择\")\r\n        # self.btnSite.setText(\"Site Selection\")\r\n        self.btnSite.clicked.connect(self.site_choose)\r\n        self.viewer.mouse_moved.connect(self.draw_line)\r\n\r\n        self.btnSiteInfo = QPushButton(self)\r\n        self.btnSiteInfo.setText(\"地点信息\")\r\n        # self.btnSiteInfo.setText(\"Site Info\")\r\n        self.btnSiteInfo.clicked.connect(self.site_info)\r\n\r\n        self.site_ContourName = QLineEdit(self)\r\n        self.site_ContourName.setPlaceholderText(\"所属轮廓\")\r\n        # self.site_ContourName.setPlaceholderText(\"Contour Belong\")\r\n\r\n        self.editSiteName = QLineEdit(self)\r\n        self.editSiteName.setPlaceholderText(\"地名\")\r\n        self.editSiteSlope = QLineEdit(self)\r\n        self.editSiteSlope.setPlaceholderText('斜度')\r\n        self.editSiteLenth = QLineEdit(self)\r\n        self.editSiteLenth.setPlaceholderText('长度')\r\n        self.editSitePos = QLineEdit(self)\r\n        self.editSitePos.setPlaceholderText(\"位置\")\r\n\r\n        self.btnSiteSave = QPushButton(self)\r\n        self.btnSiteSave.setText(\"存储地点信息\")\r\n        self.btnSiteSave.clicked.connect(self.save_site)\r\n\r\n        self.setStyleSheet(\r\n            \"QPushButton{background-color: rgb(39, 118, 148)}\"\r\n            \"QPushButton{color:white}\" \"QPushButton:hover{color:yellow}\" \"QPushButton:pressed{color:red;}\"\r\n            \"QPushButton{border-radius:5px}\" \"QPushButton{border:2px groove gray}\" \"QPushButton{border-style: outset}\" \"QPushButton{padding:2px 4px}\"\r\n            \"QLineEdit {border:2px groove gray}\" \"QLineEdit {border-radius:5px}\" \"QLineEdit{padding: 2px 4px}\"\r\n        )\r\n\r\n        # Arrange layout\r\n        VBlayout = QVBoxLayout(self)\r\n        VBlayout.addWidget(self.viewer)\r\n        HBlayout = QHBoxLayout()\r\n        HBlayout.setAlignment(Qt.AlignLeft)\r\n        HBlayout.addWidget(self.btnLoad)\r\n        HBlayout.addWidget(self.editYearInfo)\r\n        HBlayout.addWidget(self.btnClickDrag)\r\n        HBlayout.addWidget(self.editClickInfo)\r\n        HBlayout.addWidget(self.btnContour)\r\n        HBlayout.addWidget(self.btnDrag)\r\n\r\n        # 第二行信息\r\n        HBlayoutSecond =QHBoxLayout()\r\n        HBlayoutSecond.setAlignment(Qt.AlignLeft)\r\n        HBlayoutSecond.addWidget(self.btnContourInfo)\r\n        HBlayoutSecond.addWidget(self.editcontourName)\r\n        HBlayoutSecond.addWidget(self.editContourArea)\r\n        HBlayoutSecond.addWidget(self.editContourPerimeter)\r\n        HBlayoutSecond.addWidget(self.editContourCentre)\r\n        HBlayoutSecond.addWidget(self.btnContourSave)\r\n        # 第三行信息\r\n        HBlayoutThird =QHBoxLayout()\r\n        HBlayoutThird.setAlignment(Qt.AlignLeft)\r\n        HBlayoutThird.addWidget(self.btnSite)\r\n        HBlayoutThird.addWidget(self.btnSiteInfo)\r\n        HBlayoutThird.addWidget(self.site_ContourName)\r\n        HBlayoutThird.addWidget(self.editSiteName)\r\n        HBlayoutThird.addWidget(self.editSiteSlope)\r\n        HBlayoutThird.addWidget(self.editSiteLenth)\r\n        HBlayoutThird.addWidget(self.editSitePos)\r\n        HBlayoutThird.addWidget(self.btnSiteSave)\r\n\r\n        VBlayout.addLayout(HBlayout)\r\n        VBlayout.addLayout(HBlayoutSecond)\r\n        VBlayout.addLayout(HBlayoutThird)\r\n\r\n        self.setGeometry(500, 300, 800, 600)\r\n        self.setWindowTitle('历史时空')\r\n        self.setWindowIcon(QIcon('windowIcon.png'))\r\n        self.show()\r\n\r\n    #     图片加载，并存入数据库\r\n    def loadImage(self):\r\n        fname, _ = QFileDialog.getOpenFileName(self, \"选择地图\", 'C:\\\\Users\\\\张波\\\\Desktop\\\\example', 'Image files(*.jpg *.gif *.png)')\r\n        # fi = QtCott\r\n        # re.QFileInfo(fname) 获取fname的信息\r\n        if not fname:\r\n            pass\r\n        else:\r\n            # 从新加载图片，清空变量\r\n            # 存储加载的图片和抽取的轮廓\r\n            self.image = array([])\r\n            self.cnt = array([])\r\n\r\n            # 鼠标点击坐标和鼠标释放坐标\r\n            self.x_clicked = 0\r\n            self.y_clicked = 0\r\n            self.x_released = 0\r\n            self.y_released = 0\r\n\r\n            self.image = cv.imdecode(fromfile(fname,dtype= uint8),-1)\r\n            year_img = self.image[0:100, 0:500]\r\n            cut_bila = cv.bilateralFilter(year_img, d=0, sigmaColor=75, sigmaSpace=15)\r\n            cv.imwrite('image/year.jpg', cut_bila)\r\n            year_str = self.baidu_api.picture2text('image/year.jpg')\r\n            year_int = findall(r'\\d+', year_str)\r\n            if '前' in year_str:\r\n                map_year = -int(year_int[0])\r\n            else:\r\n                map_year = int(year_int[0])\r\n            myimage = open(fname, 'rb')\r\n            map_img = myimage.read()\r\n            mysqlConn = MySqlConn()\r\n            self.editYearInfo.setText(str(map_year))\r\n            # print(len(map_img))\r\n            mysqlConn.img_insert(map_year=map_year,map_img=map_img)\r\n            image_height, image_width, image_depth = self.image.shape\r\n            QIm = cv.cvtColor(self.image, cv.COLOR_BGR2RGB)\r\n            QIm = QImage(QIm.data, image_width, image_height, image_width * image_depth,\r\n                               QImage.Format_RGB888)\r\n            self.viewer.setPhoto(QPixmap.fromImage(QIm))\r\n            self.viewer.fitInView()\r\n\r\n    # 鼠标切换点击和拖拽模式\r\n    def clickDrag(self):\r\n        if self.viewer._contour or self.viewer._ocr:\r\n            pass\r\n        else:\r\n            if self.viewer.dragMode():\r\n                self.btnClickDrag.setIcon(QIcon(\"image/clickIcon.png\"))\r\n            else:\r\n                self.btnClickDrag.setIcon(QIcon(\"image/dragIcon.png\"))\r\n            self.viewer.toggleDragMode()\r\n\r\n    # 传递鼠标点击的坐标\r\n    def photoClicked(self, pos):\r\n        if self.viewer.dragMode() == QGraphicsView.NoDrag:\r\n            self.editClickInfo.setText('%d, %d' % (pos.x(), pos.y()))\r\n            self.x_clicked = pos.x()\r\n            self.y_clicked = pos.y()\r\n\r\n    # 获取轮廓\r\n    def getContour(self):\r\n\r\n        # 获取鼠标点击处的hsv值\r\n        hsv = cv.cvtColor(self.image, cv.COLOR_BGR2HSV)\r\n\r\n        # 使用区域的hsv均值代替某一点的hsv的值\r\n        area_hsv = [0, 0, 0]\r\n\r\n        for i in range(-3, 6, 3):\r\n            for j in range(-3, 6, 3):\r\n                area_hsv = area_hsv + hsv[self.y_clicked - i, self.x_clicked - j]\r\n        color_hsv = area_hsv // 9\r\n        # 判断需要提取的hsv区间\r\n        color = False\r\n        for key, value in self.color_dict.items():\r\n            if color_hsv[0] >= value[0][0] and color_hsv[0] <= value[1][0] and color_hsv[1] >= value[0][1] and color_hsv[1] <= value[1][1] and color_hsv[2] >= value[0][2] and color_hsv[2] <= value[1][2]:\r\n                color = True\r\n                lower_HSV = value[0]\r\n                upper_HSV = value[1]\r\n                self.color_dict.pop(key)\r\n                self.color_dict[key] = value\r\n                break\r\n        if not color:\r\n            print(\"请重新选区颜色\")\r\n        else:\r\n            # 中值滤波去除椒盐噪声\r\n            blurImg = cv.medianBlur(self.image, 21)\r\n            # cv.namedWindow(\"BlurImg\",cv.WINDOW_KEEPRATIO)\r\n            # cv.imshow(\"BlurImg\",blurImg)\r\n            # cv.imwrite(\"blur.jpg\",blurImg)\r\n            img = cv.cvtColor(blurImg, cv.COLOR_BGR2HSV)\r\n            # 提取对应的hsv区域\r\n            mask = cv.inRange(img, lower_HSV, upper_HSV)\r\n            choose_color = cv.bitwise_and(img, img, mask=mask)\r\n            result = cv.cvtColor(choose_color, cv.COLOR_HSV2BGR)\r\n            gray = cv.cvtColor(result, cv.COLOR_BGR2GRAY)  # 图象灰度化\r\n            # 提取图象梯度(可改进）\r\n            gradX = cv.Sobel(gray, ddepth=cv.CV_32F, dx=1, dy=0, ksize=-1)\r\n            gradY = cv.Sobel(gray, ddepth=cv.CV_32F, dx=0, dy=1, ksize=-1)\r\n\r\n            # gradX = cv.Scharr(gray, cv.CV_64F, 1, 0)\r\n            # gradY = cv.Scharr(gray, cv.CV_64F, 0, 1)\r\n            # 保留水平和竖直梯度大的\r\n            gradient = cv.max(gradX, gradY)\r\n            # cv.namedWindow(\"Img0\", cv.WINDOW_KEEPRATIO)\r\n            # cv.imshow(\"Img0\", gradient)\r\n            # cv.imwrite(\"img0.jpg\", gradient)\r\n            gradient = cv.convertScaleAbs(gradient)\r\n            #  寻找轮廓\r\n            # 采用三角形法进行二值化\r\n            # hist = cv.calcHist([gradient],[0],None,[256],[0,256])\r\n            # plt.plot(hist)\r\n            # plt.show()\r\n            ret, th = cv.threshold(gradient, 0, 255, cv.THRESH_BINARY | cv.THRESH_TRIANGLE)\r\n            # cv.namedWindow(\"Img\", cv.WINDOW_KEEPRATIO)\r\n            # cv.imshow(\"Img\", th)\r\n            # cv.imwrite(\"img.jpg\", th)\r\n            kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))\r\n            # 闭运算，先腐蚀后膨胀，去除黑色小点\r\n            closed = cv.morphologyEx(th, cv.MORPH_CLOSE, kernel,iterations=6)\r\n            # 轮廓生成\r\n            # cv.namedWindow(\"Img1\", cv.WINDOW_KEEPRATIO)\r\n            # cv.imshow(\"Img1\", closed)\r\n            # cv.imwrite(\"img1.jpg\", closed)\r\n            myImage, cnts, hierarchy = cv.findContours(closed, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)\r\n            num = 0\r\n            con_exit = False\r\n            for cnt in cnts:\r\n                mesure = cv.pointPolygonTest(cnt, (self.x_clicked, self.y_clicked), measureDist=False)\r\n                if mesure == 1:\r\n                    con_exit = True\r\n                    break\r\n                num = num + 1\r\n            if con_exit :\r\n                self.cnt = cnts[num]  # 确定轮廓\r\n\r\n                back = ones(self.image.shape, uint8) * 255\r\n                img_contour = cv.drawContours(self.image.copy(), cnts, num, (255, 255, 255), 3)\r\n                # img_contour1 = cv.drawContours(back, cnts, num, (0, 0, 255), 3)\r\n                # 重新渲染\r\n                # cv.namedWindow(\"Img2\", cv.WINDOW_KEEPRATIO)\r\n                # cv.imshow(\"Img2\", img_contour1)\r\n                # cv.imwrite(\"img2.jpg\", img_contour1)\r\n                image_height, image_width, image_depth = img_contour.shape\r\n                QIm = cv.cvtColor(img_contour, cv.COLOR_BGR2RGB)\r\n                QIm = QImage(QIm.data, image_width, image_height, image_width * image_depth,\r\n                             QImage.Format_RGB888)\r\n                self.viewer.setPhoto(QPixmap.fromImage(QIm))\r\n                # 重新渲染后，图元回到拖拽模式\r\n                self.btnClickDrag.setIcon(QIcon(\"image/dragIcon.png\"))\r\n            else:\r\n                print(\"重新选区颜色点\")\r\n\r\n    #轮廓拖动模式切换\r\n    def dragOutline(self):\r\n        if not self.viewer._contour:\r\n            self.viewer._contour = True\r\n            self.viewer.toggleDragMode()\r\n            self.btnClickDrag.setIcon(QIcon(\"image/clickIcon.png\"))\r\n            self.btnDrag.setStyleSheet(\"QPushButton{color:red}\")\r\n        else:\r\n            self.viewer._contour = False\r\n            self.btnDrag.setStyleSheet(\"QPushButton{color:white}\")\r\n\r\n    # 获取鼠标松开的位置坐标\r\n    def mouse_releasePoint(self,pos):\r\n        self.x_released = pos.x()\r\n        self.y_released = pos.y()\r\n\r\n\r\n    # 轮廓拖动函数\r\n    def contourDraged(self,pos):\r\n\r\n        if self.viewer.dragMode() == QGraphicsView.NoDrag and self.viewer._contour == True:\r\n\r\n            if self.cnt.any():\r\n                for p in self.cnt:\r\n                    if ((p[0][0] - self.x_clicked) ** 2 + (p[0][1] - self.y_clicked) ** 2) <= 25:\r\n                        p[0][0] = p[0][0] + (pos.x() - self.x_clicked) * 0.9\r\n                        p[0][1] = p[0][1] + (pos.y() - self.y_clicked) * 0.9\r\n                    elif ((p[0][0] - self.x_clicked) ** 2 + (p[0][1] - self.y_clicked) ** 2) <= 100:\r\n                        p[0][0] = p[0][0] + (pos.x() - self.x_clicked) * 0.7\r\n                        p[0][1] = p[0][1] + (pos.y() - self.y_clicked) * 0.7\r\n                    elif ((p[0][0] - self.x_clicked) ** 2 + (p[0][1] - self.y_clicked) ** 2) <= 225:\r\n                        p[0][0] = p[0][0] + (pos.x() - self.x_clicked) * 0.5\r\n                        p[0][1] = p[0][1] + (pos.y() - self.y_clicked) * 0.5\r\n                    elif ((p[0][0] - self.x_clicked) ** 2 + (p[0][1] - self.y_clicked) ** 2) <= 400:\r\n                        p[0][0] = p[0][0] + (pos.x() - self.x_clicked) * 0.3\r\n                        p[0][1] = p[0][1] + (pos.y() - self.y_clicked) * 0.3\r\n                    elif ((p[0][0] - self.x_clicked) ** 2 + (p[0][1] - self.y_clicked) ** 2) <= 625:\r\n                        p[0][0] = p[0][0] + (pos.x() - self.x_clicked) * 0.1\r\n                        p[0][1] = p[0][1] + (pos.y() - self.y_clicked) * 0.1\r\n\r\n                # 重新渲染图元\r\n                img_contour = cv.drawContours(self.image.copy(), self.cnt, -1, (255, 255, 255), 3)\r\n                image_height, image_width, image_depth = img_contour.shape\r\n                QIm = cv.cvtColor(img_contour, cv.COLOR_BGR2RGB)\r\n                QIm = QImage(QIm.data, image_width, image_height, image_width * image_depth,\r\n                                   QImage.Format_RGB888)\r\n                self.viewer.setPhoto(QPixmap.fromImage(QIm))\r\n                self.viewer.curve_mode = True\r\n                self.viewer.toggleDragMode()  #判断是否还处于拖拽模式\r\n    # 获取轮廓的信息\r\n    def contour_info(self):\r\n        if self.cnt.any():\r\n            ROI = zeros(self.image.shape[:2], uint8)\r\n            proimage = self.image.copy()\r\n            roi = cv.drawContours(ROI, [self.cnt], 0, (255, 255, 255), -1)\r\n            x, y, w, h = cv.boundingRect(self.cnt)\r\n            imgroi = cv.bitwise_and(proimage, proimage, mask=roi)\r\n            site = imgroi[y:y + h, x:x + w]\r\n            median_img = cv.medianBlur(site, 9)\r\n            img_gray = cv.cvtColor(median_img,cv.COLOR_BGR2GRAY)\r\n            th = cv.adaptiveThreshold(img_gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 65, 30)\r\n            g = cv.getStructuringElement(cv.MORPH_RECT, (2, 1))\r\n            # 形态学处理，开运算\r\n            ersion = cv.erode(th, g, iterations=4)\r\n            cv.imwrite('image/contour_name.jpg', ersion)\r\n            contour_name = self.baidu_api.picture2text('image/contour_name.jpg')\r\n            self.editcontourName.setText(contour_name)\r\n            contour_area = cv.contourArea(self.cnt)\r\n            contour_perimeter = cv.arcLength(self.cnt,True)\r\n            M = cv.moments(self.cnt)\r\n            self.contour_centre = str(int(M['m10']/M['m00'])) + ',' + str(int(M['m01']/M['m00']))\r\n            self.editContourArea.setText(\"%d\" %(contour_area))\r\n            self.editContourPerimeter.setText(\"%d\" %(contour_perimeter))\r\n            self.editContourCentre.setText(\"%d,%d\" %(int(M['m10']/M['m00']),int(M['m01']/M['m00'])))\r\n\r\n    # 轮廓存储\r\n    def save_contour(self):\r\n        # 判断鼠标点击是否在原轮廓，\r\n        # mesure = cv.pointPolygonTest(self.cnt, (self.x_clicked, self.y_clicked), measureDist=False)\r\n        # # 不在，说明原轮廓处理完毕，可以将其所包含的区域填充黑色\r\n        # if mesure != 1:\r\n        #     # 将self.image 修改了\r\n        # 获取色调范围列表\r\n        self.image = cv.drawContours(self.image, [self.cnt], 0, (0, 0, 0), -1)\r\n        contour_year = int(self.editYearInfo.text())\r\n        contour_name = self.editcontourName.text()\r\n        contour_points_arr = self.cnt\r\n        print(contour_points_arr)\r\n        contour_points = dumps(contour_points_arr) #narray 转换为二进制\r\n        # print(contour_points)\r\n        contour_area = float(self.editContourArea.text())\r\n        contour_perimeter = float(self.editContourPerimeter.text())\r\n        contour_centre = self.editContourCentre.text()\r\n\r\n        mysqlConn = MySqlConn()\r\n        mysqlConn.contour_insert(contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre)\r\n\r\n    # 开启文字识别模式\r\n    def site_choose(self):\r\n        if not self.viewer._ocr:\r\n            self.viewer._ocr = True\r\n            self.viewer.toggleDragMode()\r\n            self.x_clicked = 0\r\n            self.y_clicked = 0\r\n            self.x_released = 0\r\n            self.y_released = 0\r\n            self.btnSite.setStyleSheet(\"QPushButton{color:red}\")\r\n            self.ocr_flag = True\r\n            self.btnClickDrag.setIcon(QIcon(\"image/clickIcon\"))\r\n        else:\r\n            self.viewer._ocr = False\r\n            self.btnSite.setStyleSheet(\"QPushButton{color:white}\")\r\n            self.ocr_flag = False\r\n\r\n    # 文字区域画线\r\n    def draw_line(self, pos):\r\n        if self.viewer._ocr and self.x_clicked or self.y_clicked:\r\n            img_line = cv.line(self.image.copy(), (self.x_clicked, self.y_clicked), (pos.x(), pos.y()), (0, 0, 0), 2)\r\n            image_height, image_width, image_depth = img_line.shape\r\n            QIm = cv.cvtColor(img_line, cv.COLOR_BGR2RGB)\r\n            QIm = QImage(QIm.data, image_width, image_height, image_width * image_depth,\r\n                               QImage.Format_RGB888)\r\n            self.viewer.setPhoto(QPixmap.fromImage(QIm))\r\n        # 终止画线\r\n        if self.x_released or self.y_released:\r\n            self.choosePoints = []  # 初始化存储点组\r\n            inf = float(\"inf\")\r\n            if self.x_released or self.y_released:\r\n                if (self.x_released - self.x_clicked) == 0:\r\n                    slope = inf\r\n                else:\r\n                    slope = (self.y_released - self.y_clicked) / (self.x_released - self.x_clicked)\r\n\r\n                siteLenth = 0.5 * math.sqrt(\r\n                    square(self.y_released - self.y_clicked) + square(self.x_released - self.x_clicked))\r\n\r\n                mySiteLenth = 2 * siteLenth\r\n                self.siteLenth = (\"%.2f\" % mySiteLenth)\r\n                self.editSiteLenth.setText(self.siteLenth)\r\n                radian = math.atan(slope)\r\n                self.siteSlope = (\"%.2f\" % radian)\r\n                self.editSiteSlope.setText(self.siteSlope)\r\n                x_bas = math.ceil(math.fabs(0.5 * siteLenth * math.sin(radian)))\r\n                y_bas = math.ceil(math.fabs(0.5 * siteLenth * math.cos(radian)))\r\n\r\n                if slope <= 0:\r\n                    self.choosePoints.append([(self.x_clicked - x_bas), (self.y_clicked - y_bas)])\r\n                    self.choosePoints.append([(self.x_clicked + x_bas), (self.y_clicked + y_bas)])\r\n                    self.choosePoints.append([(self.x_released + x_bas), (self.y_released + y_bas)])\r\n                    self.choosePoints.append([(self.x_released - x_bas), (self.y_released - y_bas)])\r\n                elif slope > 0:\r\n                    self.choosePoints.append([(self.x_clicked + x_bas), (self.y_clicked - y_bas)])\r\n                    self.choosePoints.append([(self.x_clicked - x_bas), (self.y_clicked + y_bas)])\r\n                    self.choosePoints.append([(self.x_released - x_bas), (self.y_released + y_bas)])\r\n                    self.choosePoints.append([(self.x_released + x_bas), (self.y_released - y_bas)])\r\n            self.viewer._ocr = False\r\n\r\n    # 求地点信息\r\n    def site_info(self):\r\n        if self.ocr_flag:\r\n            if self.choosePoints:\r\n                site_contourName = self.editcontourName.text()\r\n                self.site_ContourName.setText(site_contourName)\r\n                points = array([self.choosePoints], int32)\r\n                pts = points.reshape(-1, 1, 2)\r\n                ROI = zeros(self.image.shape[:2], uint8)\r\n                proimage = self.image.copy()\r\n                roi = cv.drawContours(ROI, [pts], 0, (255, 255, 255), -1)\r\n                x, y, w, h = cv.boundingRect(pts)\r\n                imgroi = cv.bitwise_and(proimage, proimage, mask=roi)\r\n                site = imgroi[y:y + h, x:x + w]\r\n                cut_bila = cv.bilateralFilter(site, d=0, sigmaColor=75, sigmaSpace=15)\r\n                self.site_centre = ((x + 0.5 * w), (y + 0.5 * h))\r\n                cv.imwrite('image/site.jpg', cut_bila)\r\n                siteName = self.baidu_api.picture2text('image/site.jpg')\r\n                self.editSiteName.setText(siteName)\r\n                self.editSitePos.setText(str(self.site_centre))\r\n\r\n                self.viewer._ocr = True\r\n                self.viewer.toggleDragMode()\r\n                self.x_clicked = 0\r\n                self.y_clicked = 0\r\n                self.x_released = 0\r\n                self.y_released = 0\r\n\r\n    def save_site(self):\r\n        site_year = int(self.editYearInfo.text())\r\n        site_name = self.editSiteName.text()\r\n        site_contour = self.site_ContourName.text()\r\n        site_slpoe = float(self.siteSlope)\r\n        site_lenth = float(self.siteLenth)\r\n        site_centre = str(self.site_centre)\r\n        mysqlConn = MySqlConn()\r\n        mysqlConn.site_insert(site_year, site_name, site_contour,site_slpoe, site_lenth, site_centre)\r\n    # hsv列表\r\n    # def get_corlor_list(self):\r\n    #\r\n    #     dict = defaultdict(list)\r\n    #\r\n    #     # 红色\r\n    #     lower_red = array([0, 90, 120])\r\n    #     upper_red = array([9, 255, 255])\r\n    #     color_list = []\r\n    #     color_list.append(lower_red)\r\n    #     color_list.append(upper_red)\r\n    #     dict['red'] = color_list\r\n    #     # 黄色\r\n    #     lower_yellow = array([25, 135, 80])\r\n    #     upper_yellow = array([38, 255, 255])\r\n    #     color_list = []\r\n    #     color_list.append(lower_yellow)\r\n    #     color_list.append(upper_yellow)\r\n    #     dict['yellow'] = color_list\r\n    #     # 绿色\r\n    #     lower_green = array([47, 160, 70])\r\n    #     upper_green = array([61, 255, 255])\r\n    #     color_list = []\r\n    #     color_list.append(lower_green)\r\n    #     color_list.append(upper_green)\r\n    #     dict['green'] = color_list\r\n    #     # 紫色\r\n    #     lower_purple = array([128, 120, 137])\r\n    #     upper_purple = array([149, 255, 255])\r\n    #     color_list = []\r\n    #     color_list.append(lower_purple)\r\n    #     color_list.append(upper_purple)\r\n    #     dict['purple'] = color_list\r\n    #\r\n    #     return dict\r\n\r\nif __name__ == '__main__':\r\n    import sys\r\n    app = QApplication(sys.argv)\r\n    window = Window()\r\n    sys.exit(app.exec_())
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pyqt5/photo_window.py	(revision 18555c02cfa188ddd11f1e941b7d74ec6489df5c)
++++ pyqt5/photo_window.py	(date 1587524855534)
+@@ -5,7 +5,7 @@
+ # @File    : photo_window.py
+ # @Software: PyCharm
+ from pickle import dumps
+-from numpy import array, fromfile, uint8, zeros, square, math, int32,ones
++from numpy import array, fromfile, uint8, zeros, square, math, int32, ones
+ import cv2 as cv
+ from re import findall
+ from PyQt5.QtWidgets import QPushButton, QLineEdit, QHBoxLayout, QVBoxLayout, QFileDialog, QWidget, QGraphicsView, \
+@@ -21,7 +21,7 @@
+ 
+ class Window(QWidget):
+     def __init__(self):
+-        super(Window,self).__init__()
++        super(Window, self).__init__()
+         self.init_WINDOW()
+ 
+     def init_WINDOW(self):
+@@ -37,7 +37,7 @@
+         self.x_released = 0
+         self.y_released = 0
+ 
+-        self.fnmae = '' #加载的map
++        self.fnmae = ''  # 加载的map
+         self.baidu_api = BaiDuAPI()
+ 
+         # 图片图元
+@@ -63,7 +63,7 @@
+         # 点击处的信息
+         self.editClickInfo = QLineEdit(self)
+         self.editClickInfo.setReadOnly(True)
+-        self.viewer.mouse_clicked.connect(self.photoClicked)#自建的鼠标点击的传递信号连接photoClicked函数
++        self.viewer.mouse_clicked.connect(self.photoClicked)  # 自建的鼠标点击的传递信号连接photoClicked函数
+ 
+         # 轮廓生成按钮，连接轮廓生成函数
+         self.btnContour = QPushButton(self)
+@@ -74,7 +74,7 @@
+         self.btnDrag = QPushButton(self)
+         self.btnDrag.setText("轮廓拖拽")
+         self.btnDrag.clicked.connect(self.dragOutline)
+-        self.viewer.mouse_released.connect(self.mouse_releasePoint)#自建鼠标松开信号连接了两个函数
++        self.viewer.mouse_released.connect(self.mouse_releasePoint)  # 自建鼠标松开信号连接了两个函数
+         self.viewer.mouse_released.connect(self.contourDraged)
+ 
+         # 获取轮廓信息的按钮
+@@ -105,7 +105,6 @@
+         # self.btnContourSave.setText("Store Profile Information")
+         self.btnContourSave.clicked.connect(self.save_contour)
+ 
+-
+         # 地点识别
+         self.btnSite = QPushButton(self)
+         self.btnSite.setText("地点选择")
+@@ -155,7 +154,7 @@
+         HBlayout.addWidget(self.btnDrag)
+ 
+         # 第二行信息
+-        HBlayoutSecond =QHBoxLayout()
++        HBlayoutSecond = QHBoxLayout()
+         HBlayoutSecond.setAlignment(Qt.AlignLeft)
+         HBlayoutSecond.addWidget(self.btnContourInfo)
+         HBlayoutSecond.addWidget(self.editcontourName)
+@@ -164,7 +163,7 @@
+         HBlayoutSecond.addWidget(self.editContourCentre)
+         HBlayoutSecond.addWidget(self.btnContourSave)
+         # 第三行信息
+-        HBlayoutThird =QHBoxLayout()
++        HBlayoutThird = QHBoxLayout()
+         HBlayoutThird.setAlignment(Qt.AlignLeft)
+         HBlayoutThird.addWidget(self.btnSite)
+         HBlayoutThird.addWidget(self.btnSiteInfo)
+@@ -186,7 +185,8 @@
+ 
+     #     图片加载，并存入数据库
+     def loadImage(self):
+-        fname, _ = QFileDialog.getOpenFileName(self, "选择地图", 'C:\\Users\\张波\\Desktop\\example', 'Image files(*.jpg *.gif *.png)')
++        fname, _ = QFileDialog.getOpenFileName(self, "选择地图", 'D:\\0Kind of File\\Map\\中国历史地图第三版',
++                                               'Image files(*.jpg *.gif *.png)')
+         # fi = QtCott
+         # re.QFileInfo(fname) 获取fname的信息
+         if not fname:
+@@ -203,7 +203,7 @@
+             self.x_released = 0
+             self.y_released = 0
+ 
+-            self.image = cv.imdecode(fromfile(fname,dtype= uint8),-1)
++            self.image = cv.imdecode(fromfile(fname, dtype=uint8), -1)
+             year_img = self.image[0:100, 0:500]
+             cut_bila = cv.bilateralFilter(year_img, d=0, sigmaColor=75, sigmaSpace=15)
+             cv.imwrite('image/year.jpg', cut_bila)
+@@ -218,11 +218,11 @@
+             mysqlConn = MySqlConn()
+             self.editYearInfo.setText(str(map_year))
+             # print(len(map_img))
+-            mysqlConn.img_insert(map_year=map_year,map_img=map_img)
++            mysqlConn.img_insert(map_year=map_year, map_img=map_img)
+             image_height, image_width, image_depth = self.image.shape
+             QIm = cv.cvtColor(self.image, cv.COLOR_BGR2RGB)
+             QIm = QImage(QIm.data, image_width, image_height, image_width * image_depth,
+-                               QImage.Format_RGB888)
++                         QImage.Format_RGB888)
+             self.viewer.setPhoto(QPixmap.fromImage(QIm))
+             self.viewer.fitInView()
+ 
+@@ -304,11 +304,14 @@
+             # cv.imwrite("img.jpg", th)
+             kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
+             # 闭运算，先腐蚀后膨胀，去除黑色小点
+-            closed = cv.morphologyEx(th, cv.MORPH_CLOSE, kernel,iterations=6)
++            closed = cv.morphologyEx(th, cv.MORPH_CLOSE, kernel, iterations=6)
+             # 轮廓生成
+             # cv.namedWindow("Img1", cv.WINDOW_KEEPRATIO)
+             # cv.imshow("Img1", closed)
+             # cv.imwrite("img1.jpg", closed)
++
++            # OpenCV3 的findContours有三个返回值，OpenCV 4的有四个返回值
++            # 应该安装opencv-python 3.*版本。
+             myImage, cnts, hierarchy = cv.findContours(closed, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+             num = 0
+             con_exit = False
+@@ -318,7 +321,7 @@
+                     con_exit = True
+                     break
+                 num = num + 1
+-            if con_exit :
++            if con_exit:
+                 self.cnt = cnts[num]  # 确定轮廓
+ 
+                 back = ones(self.image.shape, uint8) * 255
+@@ -338,7 +341,7 @@
+             else:
+                 print("重新选区颜色点")
+ 
+-    #轮廓拖动模式切换
++    # 轮廓拖动模式切换
+     def dragOutline(self):
+         if not self.viewer._contour:
+             self.viewer._contour = True
+@@ -350,13 +353,12 @@
+             self.btnDrag.setStyleSheet("QPushButton{color:white}")
+ 
+     # 获取鼠标松开的位置坐标
+-    def mouse_releasePoint(self,pos):
++    def mouse_releasePoint(self, pos):
+         self.x_released = pos.x()
+         self.y_released = pos.y()
+ 
+-
+     # 轮廓拖动函数
+-    def contourDraged(self,pos):
++    def contourDraged(self, pos):
+ 
+         if self.viewer.dragMode() == QGraphicsView.NoDrag and self.viewer._contour == True:
+ 
+@@ -383,10 +385,11 @@
+                 image_height, image_width, image_depth = img_contour.shape
+                 QIm = cv.cvtColor(img_contour, cv.COLOR_BGR2RGB)
+                 QIm = QImage(QIm.data, image_width, image_height, image_width * image_depth,
+-                                   QImage.Format_RGB888)
++                             QImage.Format_RGB888)
+                 self.viewer.setPhoto(QPixmap.fromImage(QIm))
+                 self.viewer.curve_mode = True
+-                self.viewer.toggleDragMode()  #判断是否还处于拖拽模式
++                self.viewer.toggleDragMode()  # 判断是否还处于拖拽模式
++
+     # 获取轮廓的信息
+     def contour_info(self):
+         if self.cnt.any():
+@@ -397,7 +400,7 @@
+             imgroi = cv.bitwise_and(proimage, proimage, mask=roi)
+             site = imgroi[y:y + h, x:x + w]
+             median_img = cv.medianBlur(site, 9)
+-            img_gray = cv.cvtColor(median_img,cv.COLOR_BGR2GRAY)
++            img_gray = cv.cvtColor(median_img, cv.COLOR_BGR2GRAY)
+             th = cv.adaptiveThreshold(img_gray, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 65, 30)
+             g = cv.getStructuringElement(cv.MORPH_RECT, (2, 1))
+             # 形态学处理，开运算
+@@ -406,12 +409,12 @@
+             contour_name = self.baidu_api.picture2text('image/contour_name.jpg')
+             self.editcontourName.setText(contour_name)
+             contour_area = cv.contourArea(self.cnt)
+-            contour_perimeter = cv.arcLength(self.cnt,True)
++            contour_perimeter = cv.arcLength(self.cnt, True)
+             M = cv.moments(self.cnt)
+-            self.contour_centre = str(int(M['m10']/M['m00'])) + ',' + str(int(M['m01']/M['m00']))
+-            self.editContourArea.setText("%d" %(contour_area))
+-            self.editContourPerimeter.setText("%d" %(contour_perimeter))
+-            self.editContourCentre.setText("%d,%d" %(int(M['m10']/M['m00']),int(M['m01']/M['m00'])))
++            self.contour_centre = str(int(M['m10'] / M['m00'])) + ',' + str(int(M['m01'] / M['m00']))
++            self.editContourArea.setText("%d" % (contour_area))
++            self.editContourPerimeter.setText("%d" % (contour_perimeter))
++            self.editContourCentre.setText("%d,%d" % (int(M['m10'] / M['m00']), int(M['m01'] / M['m00'])))
+ 
+     # 轮廓存储
+     def save_contour(self):
+@@ -426,14 +429,15 @@
+         contour_name = self.editcontourName.text()
+         contour_points_arr = self.cnt
+         print(contour_points_arr)
+-        contour_points = dumps(contour_points_arr) #narray 转换为二进制
++        contour_points = dumps(contour_points_arr)  # narray 转换为二进制
+         # print(contour_points)
+         contour_area = float(self.editContourArea.text())
+         contour_perimeter = float(self.editContourPerimeter.text())
+         contour_centre = self.editContourCentre.text()
+ 
+         mysqlConn = MySqlConn()
+-        mysqlConn.contour_insert(contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre)
++        mysqlConn.contour_insert(contour_year, contour_name, contour_points, contour_area, contour_perimeter,
++                                 contour_centre)
+ 
+     # 开启文字识别模式
+     def site_choose(self):
+@@ -459,7 +463,7 @@
+             image_height, image_width, image_depth = img_line.shape
+             QIm = cv.cvtColor(img_line, cv.COLOR_BGR2RGB)
+             QIm = QImage(QIm.data, image_width, image_height, image_width * image_depth,
+-                               QImage.Format_RGB888)
++                         QImage.Format_RGB888)
+             self.viewer.setPhoto(QPixmap.fromImage(QIm))
+         # 终止画线
+         if self.x_released or self.y_released:
+@@ -531,7 +535,7 @@
+         site_lenth = float(self.siteLenth)
+         site_centre = str(self.site_centre)
+         mysqlConn = MySqlConn()
+-        mysqlConn.site_insert(site_year, site_name, site_contour,site_slpoe, site_lenth, site_centre)
++        mysqlConn.site_insert(site_year, site_name, site_contour, site_slpoe, site_lenth, site_centre)
+     # hsv列表
+     # def get_corlor_list(self):
+     #
+@@ -568,8 +572,10 @@
+     #
+     #     return dict
+ 
++
+ if __name__ == '__main__':
+     import sys
++
+     app = QApplication(sys.argv)
+     window = Window()
+-    sys.exit(app.exec_())
+\ No newline at end of file
++    sys.exit(app.exec_())
+Index: pyqt5/baidu_ocr.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># -*- coding: utf-8 -*-\r\n# @Time    : 2019/1/8 9:28\r\n# @Author  : Bo\r\n# @Email   : mat_wu@163.com\r\n# @File    : baidu_ocr.py\r\n# @Software: PyCharm\r\n\r\nfrom  aip import AipOcr\r\nimport configparser\r\nfile_config = 'password.txt'\r\n\r\nclass BaiDuAPI:\r\n    \"\"\"\r\n    调用百度API进行文字识别\r\n    \"\"\"\r\n\r\n    def __init__(self):\r\n        self.file_path = file_config\r\n        try:\r\n            target = configparser.ConfigParser()\r\n            target.read(self.file_path, encoding='utf-8')  # 注意编码方式\r\n            app_id = target.get('MyPassWord', 'APP_ID')\r\n            api_key = target.get('MyPassWord', 'API_Key')\r\n            secret_key = target.get('MyPassWord', 'Secret_Key')\r\n            self.client = AipOcr(app_id, api_key, secret_key)\r\n        except IOError:\r\n            print(\"Error: 没有加载配置文件\")\r\n\r\n    def picture2text(self,filePath):\r\n        # 图片识别成文字\r\n        image = self.get_picture(filePath)\r\n        texts = self.client.basicGeneral(image)\r\n        all_texts = ''\r\n\r\n        if texts['words_result'] !=[]:\r\n            for word in texts['words_result']:\r\n                all_texts = all_texts + word.get('words',' ')\r\n        else:\r\n            all_texts = \"未能识别\"\r\n        return all_texts\r\n\r\n    @staticmethod #装饰器\r\n    def get_picture(filePath):\r\n        with open(filePath,'rb') as fp:\r\n            return fp.read()\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pyqt5/baidu_ocr.py	(revision 18555c02cfa188ddd11f1e941b7d74ec6489df5c)
++++ pyqt5/baidu_ocr.py	(date 1587524855561)
+@@ -5,10 +5,12 @@
+ # @File    : baidu_ocr.py
+ # @Software: PyCharm
+ 
+-from  aip import AipOcr
++from aip import AipOcr
+ import configparser
++
+ file_config = 'password.txt'
+ 
++
+ class BaiDuAPI:
+     """
+     调用百度API进行文字识别
+@@ -26,21 +28,20 @@
+         except IOError:
+             print("Error: 没有加载配置文件")
+ 
+-    def picture2text(self,filePath):
++    def picture2text(self, filePath):
+         # 图片识别成文字
+         image = self.get_picture(filePath)
+         texts = self.client.basicGeneral(image)
+         all_texts = ''
+ 
+-        if texts['words_result'] !=[]:
++        if texts['words_result'] != []:
+             for word in texts['words_result']:
+-                all_texts = all_texts + word.get('words',' ')
++                all_texts = all_texts + word.get('words', ' ')
+         else:
+             all_texts = "未能识别"
+         return all_texts
+ 
+-    @staticmethod #装饰器
++    @staticmethod  # 装饰器
+     def get_picture(filePath):
+-        with open(filePath,'rb') as fp:
++        with open(filePath, 'rb') as fp:
+             return fp.read()
+-
+Index: pyqt5/photo_viewer.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># -*- coding: utf-8 -*-\r\n# @Time    : 2019/1/8 11:42\r\n# @Author  : Bo\r\n# @Email   : mat_wu@163.com\r\n# @File    : photo_viewer_time.py\r\n# @Software: PyCharm\r\n\r\nfrom PyQt5.QtGui import QBrush, QPixmap, QColor\r\nfrom PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QFrame\r\nfrom PyQt5.QtCore import QPoint, pyqtSignal, Qt, QRectF\r\n\r\n\r\nclass PhotoViewer(QGraphicsView):\r\n    # 分别传递鼠标点击，移动，松开信号\r\n    mouse_clicked = pyqtSignal(QPoint)\r\n    mouse_moved = pyqtSignal(QPoint)\r\n    mouse_released = pyqtSignal(QPoint)\r\n\r\n    def __init__(self,parent):\r\n        super(PhotoViewer, self).__init__(parent)\r\n        self.init_UI()\r\n\r\n    def init_UI(self):\r\n\r\n        self._zoom = 0 # 定义图片的放大级别\r\n        self._empty = True # 定义是否含有图片（点击模式和拖动模式切换）\r\n        self._contour = False #定义轮廓拖动模式\r\n        self._ocr = False # 定义文字识别模式\r\n\r\n        self._scene = QGraphicsScene(self)  # 新建一个场景\r\n        self._photo = QGraphicsPixmapItem()  # 新建一个图像图元\r\n        self._scene.addItem(self._photo)  # 图像图元添加到场景中\r\n        self.setScene(self._scene)  # 场景添加到视图中\r\n        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)  # 坐标转换时以鼠标所在位置为中心\r\n        self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)  # 视图大小调整时该如何定位其中的场景\r\n        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 垂直滚动条关闭\r\n        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 平行滚动条关闭\r\n        self.setBackgroundBrush(QBrush(QColor(30, 30, 30)))  # 背景色\r\n        self.setFrameShape(QFrame.NoFrame)  # 设置QFrame在它的内容周围画一个框\r\n\r\n\r\n    def hasPhoto(self):\r\n        # 是否加载图片\r\n        return not self._empty\r\n\r\n    def fitInView(self, scale = True):\r\n        # 图片自适应函数，缩放模式开启\r\n        rect = QRectF(self._photo.pixmap().rect())  # 绘制图元大小的矩形\r\n        if not rect.isNull():\r\n            self.setSceneRect(rect) #这个矩形限定了场景的范围\r\n            if self.hasPhoto():\r\n                unity = self.transform().mapRect(QRectF(0, 0, 1, 1))\r\n                self.scale(1 / unity.width(), 1 / unity.height())\r\n                viewrect = self.viewport().rect()\r\n                scenerect = self.transform().mapRect(rect)\r\n                factor = min(viewrect.width() / scenerect.width(),\r\n                             viewrect.height() / scenerect.height())\r\n                self.scale(factor, factor)\r\n            self._zoom = 0\r\n\r\n    def setPhoto(self,pixmap = None):\r\n        # 加载和重新渲染图元\r\n        # self._zoom = 0 # 重新渲染的时候保持放大比例，并不初始化为_zoom为0\r\n        if pixmap and not pixmap.isNull():\r\n            self._empty = False\r\n            self.setDragMode(QGraphicsView.ScrollHandDrag)\r\n            self._photo.setPixmap(pixmap)\r\n        else:\r\n            self._empty = True\r\n            self.setDragMode(QGraphicsView.NoDrag)\r\n            self._photo.setPixmap(QPixmap())\r\n\r\n        # 是否从新适应\r\n        # self.fitInView()\r\n\r\n    def wheelEvent(self, event):\r\n        # 鼠标滚轮控制放大缩小\r\n        if self.hasPhoto():\r\n            if event.angleDelta().y() > 0:\r\n                factor = 1.25\r\n                self._zoom += 1\r\n            else:\r\n                factor = 0.8\r\n                self._zoom -= 1\r\n            if self._zoom > 0:\r\n                self.scale(factor, factor)\r\n            elif self._zoom == 0:\r\n                self.fitInView()\r\n            else:\r\n                self._zoom = 0\r\n\r\n    def toggleDragMode(self):\r\n        # 鼠标拖动和点击及切换函数\r\n        if self._contour or self._ocr:\r\n            self.setDragMode(QGraphicsView.NoDrag)\r\n        else:\r\n            if self.dragMode() == QGraphicsView.ScrollHandDrag:\r\n                self.setDragMode(QGraphicsView.NoDrag)\r\n            elif not self._photo.pixmap().isNull():\r\n                self.setDragMode(QGraphicsView.ScrollHandDrag)\r\n\r\n    def mousePressEvent(self, event):\r\n        # 鼠标点击返回鼠标所在的图片坐标\r\n        if self._photo.isUnderMouse():\r\n            # 注意坐标系转换 详解http://blog.51cto.com/9291927/1879128\r\n            p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))\r\n            self.mouse_clicked.emit(p.toPoint())\r\n        super(PhotoViewer, self).mousePressEvent(event)\r\n\r\n    def mouseMoveEvent(self, event):\r\n        if self._ocr == True : #只有当文字识别的时候实时返回拖动的鼠标的坐标\r\n            if self._photo.isUnderMouse():\r\n                p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))\r\n                self.mouse_moved.emit(p.toPoint())\r\n        super(PhotoViewer, self).mouseMoveEvent(event)\r\n\r\n    def mouseReleaseEvent(self, event):\r\n        # 获取鼠标松开的坐标点\r\n        if self._photo.isUnderMouse():\r\n            p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))\r\n            self.mouse_released.emit(p.toPoint())\r\n        super(PhotoViewer, self).mouseReleaseEvent(event)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pyqt5/photo_viewer.py	(revision 18555c02cfa188ddd11f1e941b7d74ec6489df5c)
++++ pyqt5/photo_viewer.py	(date 1587524855547)
+@@ -16,16 +16,16 @@
+     mouse_moved = pyqtSignal(QPoint)
+     mouse_released = pyqtSignal(QPoint)
+ 
+-    def __init__(self,parent):
++    def __init__(self, parent):
+         super(PhotoViewer, self).__init__(parent)
+         self.init_UI()
+ 
+     def init_UI(self):
+ 
+-        self._zoom = 0 # 定义图片的放大级别
+-        self._empty = True # 定义是否含有图片（点击模式和拖动模式切换）
+-        self._contour = False #定义轮廓拖动模式
+-        self._ocr = False # 定义文字识别模式
++        self._zoom = 0  # 定义图片的放大级别
++        self._empty = True  # 定义是否含有图片（点击模式和拖动模式切换）
++        self._contour = False  # 定义轮廓拖动模式
++        self._ocr = False  # 定义文字识别模式
+ 
+         self._scene = QGraphicsScene(self)  # 新建一个场景
+         self._photo = QGraphicsPixmapItem()  # 新建一个图像图元
+@@ -38,16 +38,15 @@
+         self.setBackgroundBrush(QBrush(QColor(30, 30, 30)))  # 背景色
+         self.setFrameShape(QFrame.NoFrame)  # 设置QFrame在它的内容周围画一个框
+ 
+-
+     def hasPhoto(self):
+         # 是否加载图片
+         return not self._empty
+ 
+-    def fitInView(self, scale = True):
++    def fitInView(self, scale=True):
+         # 图片自适应函数，缩放模式开启
+         rect = QRectF(self._photo.pixmap().rect())  # 绘制图元大小的矩形
+         if not rect.isNull():
+-            self.setSceneRect(rect) #这个矩形限定了场景的范围
++            self.setSceneRect(rect)  # 这个矩形限定了场景的范围
+             if self.hasPhoto():
+                 unity = self.transform().mapRect(QRectF(0, 0, 1, 1))
+                 self.scale(1 / unity.width(), 1 / unity.height())
+@@ -58,7 +57,7 @@
+                 self.scale(factor, factor)
+             self._zoom = 0
+ 
+-    def setPhoto(self,pixmap = None):
++    def setPhoto(self, pixmap=None):
+         # 加载和重新渲染图元
+         # self._zoom = 0 # 重新渲染的时候保持放大比例，并不初始化为_zoom为0
+         if pixmap and not pixmap.isNull():
+@@ -108,7 +107,7 @@
+         super(PhotoViewer, self).mousePressEvent(event)
+ 
+     def mouseMoveEvent(self, event):
+-        if self._ocr == True : #只有当文字识别的时候实时返回拖动的鼠标的坐标
++        if self._ocr == True:  # 只有当文字识别的时候实时返回拖动的鼠标的坐标
+             if self._photo.isUnderMouse():
+                 p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))
+                 self.mouse_moved.emit(p.toPoint())
+@@ -119,4 +118,4 @@
+         if self._photo.isUnderMouse():
+             p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))
+             self.mouse_released.emit(p.toPoint())
+-        super(PhotoViewer, self).mouseReleaseEvent(event)
+\ No newline at end of file
++        super(PhotoViewer, self).mouseReleaseEvent(event)
+Index: time_format/photo_viewer_time.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># -*- coding: utf-8 -*-\r\n# @Time    : 2019/1/8 11:42\r\n# @Author  : Bo\r\n# @Email   : mat_wu@163.com\r\n# @File    : photo_viewer_time.py\r\n# @Software: PyCharm\r\n\r\nfrom PyQt5.QtGui import QBrush, QPixmap, QColor\r\nfrom PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QFrame\r\nfrom PyQt5.QtCore import QPoint, pyqtSignal, Qt, QRectF\r\n\r\n\r\nclass PhotoViewer(QGraphicsView):\r\n    # 分别传递鼠标点击，移动，松开信号\r\n    mouse_clicked = pyqtSignal(QPoint)\r\n    mouse_moved = pyqtSignal(QPoint)\r\n    mouse_released = pyqtSignal(QPoint)\r\n\r\n    def __init__(self,parent):\r\n        super(PhotoViewer, self).__init__(parent)\r\n        self.init_UI()\r\n\r\n    def init_UI(self):\r\n\r\n        self._zoom = 0 # 定义图片的放大级别\r\n        self._empty = True # 定义是否含有图片（点击模式和拖动模式切换）\r\n        self._contour = False #定义轮廓拖动模式 0\r\n        self._ocr = False # 定义文字识别模式\r\n\r\n        self._scene = QGraphicsScene(self)  # 新建一个场景\r\n        self._photo = QGraphicsPixmapItem()  # 新建一个图像图元\r\n        self._scene.addItem(self._photo)  # 图像图元添加到场景中\r\n        self.setScene(self._scene)  # 场景添加到视图中\r\n        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)  # 坐标转换时以鼠标所在位置为中心\r\n        self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)  # 视图大小调整时该如何定位其中的场景\r\n        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 垂直滚动条关闭\r\n        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 平行滚动条关闭\r\n        self.setBackgroundBrush(QBrush(QColor(30, 30, 30)))  # 背景色\r\n        self.setFrameShape(QFrame.NoFrame)  # 设置QFrame在它的内容周围画一个框\r\n\r\n\r\n    def hasPhoto(self):\r\n        # 是否加载图片\r\n        return not self._empty\r\n\r\n    def fitInView(self, scale = True):\r\n        # 图片自适应函数，缩放模式开启\r\n        rect = QRectF(self._photo.pixmap().rect())  # 绘制图元大小的矩形\r\n        if not rect.isNull():\r\n            self.setSceneRect(rect) #这个矩形限定了场景的范围\r\n            if self.hasPhoto():\r\n                unity = self.transform().mapRect(QRectF(0, 0, 1, 1))\r\n                self.scale(1 / unity.width(), 1 / unity.height())\r\n                viewrect = self.viewport().rect()\r\n                scenerect = self.transform().mapRect(rect)\r\n                factor = min(viewrect.width() / scenerect.width(),\r\n                             viewrect.height() / scenerect.height())\r\n                self.scale(factor, factor)\r\n            self._zoom = 0\r\n\r\n    def setPhoto(self,pixmap = None):\r\n        # 加载和重新渲染图元\r\n        # self._zoom = 0 # 重新渲染的时候保持放大比例，并不初始化为_zoom为0\r\n        if pixmap and not pixmap.isNull():\r\n            self._empty = False\r\n            self.setDragMode(QGraphicsView.ScrollHandDrag)\r\n            self._photo.setPixmap(pixmap)\r\n        else:\r\n            self._empty = True\r\n            self.setDragMode(QGraphicsView.NoDrag)\r\n            self._photo.setPixmap(QPixmap())\r\n\r\n        # 是否从新适应\r\n        # self.fitInView()\r\n\r\n    def wheelEvent(self, event):\r\n        # 鼠标滚轮控制放大缩小\r\n        if self.hasPhoto():\r\n            if event.angleDelta().y() > 0:\r\n                factor = 1.25\r\n                self._zoom += 1\r\n            else:\r\n                factor = 0.8\r\n                self._zoom -= 1\r\n            if self._zoom > 0:\r\n                self.scale(factor, factor)\r\n            elif self._zoom == 0:\r\n                self.fitInView()\r\n            else:\r\n                self._zoom = 0\r\n\r\n    def toggleDragMode(self):\r\n        # 鼠标拖动和点击及切换函数\r\n        if self._contour or self._ocr:\r\n            self.setDragMode(QGraphicsView.NoDrag)\r\n        else:\r\n            if self.dragMode() == QGraphicsView.ScrollHandDrag:\r\n                self.setDragMode(QGraphicsView.NoDrag)\r\n            elif not self._photo.pixmap().isNull():\r\n                self.setDragMode(QGraphicsView.ScrollHandDrag)\r\n\r\n    def mousePressEvent(self, event):\r\n        # 鼠标点击返回鼠标所在的图片坐标\r\n        if self._photo.isUnderMouse():\r\n            # 注意坐标系转换 详解http://blog.51cto.com/9291927/1879128\r\n            p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))\r\n            self.mouse_clicked.emit(p.toPoint())\r\n        super(PhotoViewer, self).mousePressEvent(event)\r\n\r\n    def mouseMoveEvent(self, event):\r\n        if self._ocr == True : #只有当文字识别的时候实时返回拖动的鼠标的坐标\r\n            if self._photo.isUnderMouse():\r\n                p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))\r\n                self.mouse_moved.emit(p.toPoint())\r\n        super(PhotoViewer, self).mouseMoveEvent(event)\r\n\r\n    def mouseReleaseEvent(self, event):\r\n        # 获取鼠标松开的坐标点\r\n        if self._photo.isUnderMouse():\r\n            p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))\r\n            self.mouse_released.emit(p.toPoint())\r\n        super(PhotoViewer, self).mouseReleaseEvent(event)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- time_format/photo_viewer_time.py	(revision 18555c02cfa188ddd11f1e941b7d74ec6489df5c)
++++ time_format/photo_viewer_time.py	(date 1587524855528)
+@@ -16,16 +16,16 @@
+     mouse_moved = pyqtSignal(QPoint)
+     mouse_released = pyqtSignal(QPoint)
+ 
+-    def __init__(self,parent):
++    def __init__(self, parent):
+         super(PhotoViewer, self).__init__(parent)
+         self.init_UI()
+ 
+     def init_UI(self):
+ 
+-        self._zoom = 0 # 定义图片的放大级别
+-        self._empty = True # 定义是否含有图片（点击模式和拖动模式切换）
+-        self._contour = False #定义轮廓拖动模式 0
+-        self._ocr = False # 定义文字识别模式
++        self._zoom = 0  # 定义图片的放大级别
++        self._empty = True  # 定义是否含有图片（点击模式和拖动模式切换）
++        self._contour = False  # 定义轮廓拖动模式 0
++        self._ocr = False  # 定义文字识别模式
+ 
+         self._scene = QGraphicsScene(self)  # 新建一个场景
+         self._photo = QGraphicsPixmapItem()  # 新建一个图像图元
+@@ -38,16 +38,15 @@
+         self.setBackgroundBrush(QBrush(QColor(30, 30, 30)))  # 背景色
+         self.setFrameShape(QFrame.NoFrame)  # 设置QFrame在它的内容周围画一个框
+ 
+-
+     def hasPhoto(self):
+         # 是否加载图片
+         return not self._empty
+ 
+-    def fitInView(self, scale = True):
++    def fitInView(self, scale=True):
+         # 图片自适应函数，缩放模式开启
+         rect = QRectF(self._photo.pixmap().rect())  # 绘制图元大小的矩形
+         if not rect.isNull():
+-            self.setSceneRect(rect) #这个矩形限定了场景的范围
++            self.setSceneRect(rect)  # 这个矩形限定了场景的范围
+             if self.hasPhoto():
+                 unity = self.transform().mapRect(QRectF(0, 0, 1, 1))
+                 self.scale(1 / unity.width(), 1 / unity.height())
+@@ -58,7 +57,7 @@
+                 self.scale(factor, factor)
+             self._zoom = 0
+ 
+-    def setPhoto(self,pixmap = None):
++    def setPhoto(self, pixmap=None):
+         # 加载和重新渲染图元
+         # self._zoom = 0 # 重新渲染的时候保持放大比例，并不初始化为_zoom为0
+         if pixmap and not pixmap.isNull():
+@@ -108,7 +107,7 @@
+         super(PhotoViewer, self).mousePressEvent(event)
+ 
+     def mouseMoveEvent(self, event):
+-        if self._ocr == True : #只有当文字识别的时候实时返回拖动的鼠标的坐标
++        if self._ocr == True:  # 只有当文字识别的时候实时返回拖动的鼠标的坐标
+             if self._photo.isUnderMouse():
+                 p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))
+                 self.mouse_moved.emit(p.toPoint())
+@@ -119,4 +118,4 @@
+         if self._photo.isUnderMouse():
+             p = self._photo.mapToItem(self._photo, self.mapToScene(event.pos()))
+             self.mouse_released.emit(p.toPoint())
+-        super(PhotoViewer, self).mouseReleaseEvent(event)
+\ No newline at end of file
++        super(PhotoViewer, self).mouseReleaseEvent(event)
+Index: pyqt5/mysql_conn.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># -*- coding: utf-8 -*-\r\n# @Time    : 2019/1/10 16:08\r\n# @Author  : Bo\r\n# @Email   : mat_wu@163.com\r\n# @File    : mysql_conn_time.py\r\n# @Software: PyCharm\r\n\r\nfrom configparser import ConfigParser\r\nfrom pymysql import connect,Error\r\n\r\ndb_config = 'password.txt'\r\n\r\nclass MySqlConn(object):\r\n    \"\"\"数据库连接\"\"\"\r\n\r\n    # 数据库初始化连接\r\n    def __init__(self):\r\n        try:\r\n            target = ConfigParser()\r\n            target.read(db_config, encoding='utf-8')  # 注意编码方式\r\n\r\n            host = target.get('mysqlConfigure', 'host')\r\n            db = target.get('mysqlConfigure', 'db')\r\n            user = target.get('mysqlConfigure', 'user')\r\n            password = target.get('mysqlConfigure', 'password')\r\n            port = int(target.get('mysqlConfigure', 'port'))\r\n            charset = target.get('mysqlConfigure', 'charset')\r\n            self._conn = connect(host=host, user=user, passwd=password, db=db, port=port, charset = charset)\r\n            if (self._conn):\r\n                self._cur = self._conn.cursor()\r\n        except IOError:\r\n            print(\"Error: 无法连接数据库\")\r\n\r\n    # 图片入库\r\n    def img_insert(self,map_year,map_img):\r\n        insertString = 'insert into primal_map(map_year,map_image) values (%s,%s) ON DUPLICATE KEY UPDATE map_image = values(map_image)'\r\n        args = (map_year,map_img)\r\n        try:\r\n            self._cur.execute(insertString, args)\r\n            self._conn.commit()\r\n        except Error as e:\r\n            self._conn.rollback()\r\n            print(\"插入失败\")\r\n        # 无论如何，连接记得关闭游标和数据库链接\r\n        finally:\r\n            self._cur.close()  # 关闭游标\r\n            self._conn.close()  # 释放数据库资源\r\n\r\n    # 轮廓入库\r\n    def contour_insert(self,contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre):\r\n        print(contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre)\r\n        insertString = 'insert into contour_info(contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre) values (%s,%s,%s,%s,%s,%s)' \\\r\n                       'ON DUPLICATE KEY UPDATE contour_points = values(contour_points),contour_area = values(contour_area),contour_perimeter = values(contour_perimeter),'\\\r\n                       'contour_centre = values(contour_centre)'\r\n        args = (contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre)\r\n        try:\r\n            self._cur.execute(insertString, args)\r\n            self._conn.commit()\r\n        except Error as e:\r\n            self._conn.rollback()\r\n            print(\"插入失败\")\r\n        finally:\r\n            # 无论如何，连接记得关闭游标和数据库链接\r\n            self._cur.close()  # 关闭游标\r\n            self._conn.close()  # 释放数据库资源\r\n\r\n    # 地点入库\r\n    def site_insert(self, site_year, site_name, site_contour,site_slope, site_lenth, site_centre):\r\n        insertString = 'insert into site_info(site_year, site_name, site_contour,site_slope, site_lenth, site_centre) values (%s,%s,%s,%s,%s,%s)' \\\r\n                       'ON DUPLICATE KEY UPDATE site_contour = values(site_contour),site_slope = values(site_slope),site_lenth = values (site_lenth),site_centre = values (site_centre)'\r\n\r\n        args = (site_year, site_name, site_contour,site_slope, site_lenth, site_centre)\r\n        try:\r\n            self._cur.execute(insertString, args)\r\n            self._conn.commit()\r\n        # 无论如何，连接记得关闭游标和数据库链接\r\n        except Error as e:\r\n            self._conn.rollback()\r\n            print(\"插入失败\")\r\n        finally:\r\n            self._cur.close()  # 关闭游标\r\n            self._conn.close()  # 释放数据库资源\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pyqt5/mysql_conn.py	(revision 18555c02cfa188ddd11f1e941b7d74ec6489df5c)
++++ pyqt5/mysql_conn.py	(date 1587524855551)
+@@ -6,10 +6,11 @@
+ # @Software: PyCharm
+ 
+ from configparser import ConfigParser
+-from pymysql import connect,Error
++from pymysql import connect, Error
+ 
+ db_config = 'password.txt'
+ 
++
+ class MySqlConn(object):
+     """数据库连接"""
+ 
+@@ -17,7 +18,7 @@
+     def __init__(self):
+         try:
+             target = ConfigParser()
+-            target.read(db_config, encoding='utf-8')  # 注意编码方式
++            target.read(db_config, encoding='utf-8')  # 注意编码方式,可以修改位utf-8-sig
+ 
+             host = target.get('mysqlConfigure', 'host')
+             db = target.get('mysqlConfigure', 'db')
+@@ -25,16 +26,16 @@
+             password = target.get('mysqlConfigure', 'password')
+             port = int(target.get('mysqlConfigure', 'port'))
+             charset = target.get('mysqlConfigure', 'charset')
+-            self._conn = connect(host=host, user=user, passwd=password, db=db, port=port, charset = charset)
++            self._conn = connect(host=host, user=user, passwd=password, db=db, port=port, charset=charset)
+             if (self._conn):
+                 self._cur = self._conn.cursor()
+         except IOError:
+             print("Error: 无法连接数据库")
+ 
+     # 图片入库
+-    def img_insert(self,map_year,map_img):
++    def img_insert(self, map_year, map_img):
+         insertString = 'insert into primal_map(map_year,map_image) values (%s,%s) ON DUPLICATE KEY UPDATE map_image = values(map_image)'
+-        args = (map_year,map_img)
++        args = (map_year, map_img)
+         try:
+             self._cur.execute(insertString, args)
+             self._conn.commit()
+@@ -47,12 +48,13 @@
+             self._conn.close()  # 释放数据库资源
+ 
+     # 轮廓入库
+-    def contour_insert(self,contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre):
+-        print(contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre)
++    def contour_insert(self, contour_year, contour_name, contour_points, contour_area, contour_perimeter,
++                       contour_centre):
++        print(contour_year, contour_name, contour_points, contour_area, contour_perimeter, contour_centre)
+         insertString = 'insert into contour_info(contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre) values (%s,%s,%s,%s,%s,%s)' \
+-                       'ON DUPLICATE KEY UPDATE contour_points = values(contour_points),contour_area = values(contour_area),contour_perimeter = values(contour_perimeter),'\
++                       'ON DUPLICATE KEY UPDATE contour_points = values(contour_points),contour_area = values(contour_area),contour_perimeter = values(contour_perimeter),' \
+                        'contour_centre = values(contour_centre)'
+-        args = (contour_year,contour_name,contour_points,contour_area,contour_perimeter,contour_centre)
++        args = (contour_year, contour_name, contour_points, contour_area, contour_perimeter, contour_centre)
+         try:
+             self._cur.execute(insertString, args)
+             self._conn.commit()
+@@ -65,11 +67,11 @@
+             self._conn.close()  # 释放数据库资源
+ 
+     # 地点入库
+-    def site_insert(self, site_year, site_name, site_contour,site_slope, site_lenth, site_centre):
++    def site_insert(self, site_year, site_name, site_contour, site_slope, site_lenth, site_centre):
+         insertString = 'insert into site_info(site_year, site_name, site_contour,site_slope, site_lenth, site_centre) values (%s,%s,%s,%s,%s,%s)' \
+                        'ON DUPLICATE KEY UPDATE site_contour = values(site_contour),site_slope = values(site_slope),site_lenth = values (site_lenth),site_centre = values (site_centre)'
+ 
+-        args = (site_year, site_name, site_contour,site_slope, site_lenth, site_centre)
++        args = (site_year, site_name, site_contour, site_slope, site_lenth, site_centre)
+         try:
+             self._cur.execute(insertString, args)
+             self._conn.commit()
+Index: pyqt5/color_list.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># -*- coding: utf-8 -*-\r\n# @Time    : 2019/1/13 21:56\r\n# @Author  : Bo\r\n# @Email   : mat_wu@163.com\r\n# @File    : color_list.py\r\n# @Software: PyCharm\r\n\r\n# hsv列表\r\nfrom collections import defaultdict\r\nfrom numpy import array\r\n\r\ndef get_corlor_list():\r\n    dict = defaultdict(list)\r\n\r\n    # 1 red_红色\r\n    lower_1_1 = array([0, 160, 130])\r\n    upper_1_1= array([9, 255, 255])\r\n    color_list = []\r\n    color_list.append(lower_1_1)\r\n    color_list.append(upper_1_1)\r\n    dict['1_1'] = color_list\r\n\r\n    # 粉色_信德——1172\r\n    lower_1_2 = array([0, 100, 120])\r\n    upper_1_2 = array([9, 160, 255])\r\n    color_list = []\r\n    color_list.append(lower_1_2)\r\n    color_list.append(upper_1_2)\r\n    dict['1_2'] = color_list\r\n\r\n    #瓦纳斯 ——1172 褐红\r\n    lower_1_3 = array([0, 160, 90])\r\n    upper_1_3 = array([9, 200, 130])\r\n    color_list = []\r\n    color_list.append(lower_1_3)\r\n    color_list.append(upper_1_3)\r\n    dict['1_3'] = color_list\r\n\r\n\r\n    # 渤海 757 红\r\n    lower_1_4 = array([6, 90, 125])\r\n    upper_1_4 = array([14, 145, 190])\r\n    color_list = []\r\n    color_list.append(lower_1_4)\r\n    color_list.append(upper_1_4)\r\n    dict['1_4'] = color_list\r\n\r\n    # 243\r\n    lower_1_7 = array([0, 60, 80])\r\n    upper_1_7 = array([10, 140, 255])\r\n    color_list = []\r\n    color_list.append(lower_1_7)\r\n    color_list.append(upper_1_7)\r\n    dict['1_7'] = color_list\r\n\r\n    # 243 贵霜沙\r\n    lower_1_4 = array([11, 45, 100])\r\n    upper_1_4 = array([42, 125, 255])\r\n    color_list = []\r\n    color_list.append(lower_1_4)\r\n    color_list.append(upper_1_4)\r\n    dict['1_4'] = color_list\r\n\r\n    # 室韦都督 757\r\n    lower_1_5 = array([5, 145, 130])\r\n    upper_1_5 = array([14, 185, 175])\r\n    color_list = []\r\n    color_list.append(lower_1_5)\r\n    color_list.append(upper_1_5)\r\n    dict['1_5'] = color_list\r\n\r\n    # 瓦纳斯 ——1172 褐红\r\n    lower_1_6 = array([0, 144, 40])\r\n    upper_1_6 = array([20,255 , 140])\r\n    color_list = []\r\n    color_list.append(lower_1_6)\r\n    color_list.append(upper_1_6)\r\n    dict['1_6'] = color_list\r\n\r\n    # 2_花剌子模_黄褐色\r\n    lower_2_1 = array([11, 135, 80])\r\n    upper_2_1 = array([25, 200, 200])\r\n    color_list = []\r\n    color_list.append(lower_2_1)\r\n    color_list.append(upper_2_1)\r\n    dict['2_1'] = color_list\r\n\r\n    # 533 魏\r\n    lower_2_21 = array([10, 135, 95])\r\n    upper_2_21 = array([16, 255, 255])\r\n    color_list = []\r\n    color_list.append(lower_2_21)\r\n    color_list.append(upper_2_21)\r\n    dict['2_21'] = color_list\r\n\r\n    # 吐故浑 533\r\n    lower_2_22 = array([16, 95, 95])\r\n    upper_2_22 = array([27, 200, 200])\r\n    color_list = []\r\n    color_list.append(lower_2_22)\r\n    color_list.append(upper_2_22)\r\n    dict['2_22'] = color_list\r\n\r\n    lower_2_14 = array([10, 145, 100])\r\n    upper_2_14 = array([20, 220, 240])\r\n    color_list = []\r\n    color_list.append(lower_2_14)\r\n    color_list.append(upper_2_14)\r\n    dict['2_14'] = color_list\r\n\r\n    lower_2_18 = array([15, 62, 110])\r\n    upper_2_18 = array([28, 147, 220])\r\n    color_list = []\r\n    color_list.append(lower_2_18)\r\n    color_list.append(upper_2_18)\r\n    dict['2_18'] = color_list\r\n\r\n\r\n    # 457 蕨达\r\n    lower_2_13 = array([8, 0, 140])\r\n    upper_2_13 = array([63, 60, 255])\r\n    color_list = []\r\n    color_list.append(lower_2_13)\r\n    color_list.append(upper_2_13)\r\n    dict['2_13'] = color_list\r\n\r\n    # 伊利色 14\r\n    lower_14_1 = array([15, 120, 90])\r\n    upper_14_1 = array([30, 145, 170])\r\n    color_list = []\r\n    color_list.append(lower_14_1)\r\n    color_list.append(upper_14_1)\r\n    dict['14_1'] = color_list\r\n\r\n    # 明黄色，深黄 ——金，蒲甘 -1172\r\n    lower_2_2 = array([20, 110, 110])\r\n    upper_2_2 = array([35, 255, 255])\r\n    color_list = []\r\n    color_list.append(lower_2_2)\r\n    color_list.append(upper_2_2)\r\n    dict['2_2'] = color_list\r\n\r\n    # 草绿色 古尔-1210 明黄\r\n    lower_2_3 = array([25, 150, 85])\r\n    upper_2_3 = array([38, 255, 235])\r\n    color_list = []\r\n    color_list.append(lower_2_3)\r\n    color_list.append(upper_2_3)\r\n    dict['2_3'] = color_list\r\n\r\n    # 淡绿色--帕拉玛拉-1210\r\n    lower_2_4= array([25, 120, 150])\r\n    upper_2_4 = array([35, 145, 200])\r\n    color_list = []\r\n    color_list.append(lower_2_4)\r\n    color_list.append(upper_2_4)\r\n    dict['2_4'] = color_list\r\n    # 安蔡 草绿 14\r\n    lower_2_11 = array([24, 120, 150])\r\n    upper_2_11 = array([35, 155, 255])\r\n    color_list = []\r\n    color_list.append(lower_2_11)\r\n    color_list.append(upper_2_11)\r\n    dict['2_11'] = color_list\r\n\r\n    lower_2_24 = array([37, 135, 90])\r\n    upper_2_24 = array([52, 255, 255])\r\n    color_list = []\r\n    color_list.append(lower_2_24)\r\n    color_list.append(upper_2_24)\r\n    dict['2_24'] = color_list\r\n\r\n    # 青绿色--吴哥--喀喀边那-1210\r\n    lower_2_5 = array([33, 160, 100])\r\n    upper_2_5 = array([45, 255, 200])\r\n    color_list = []\r\n    color_list.append(lower_2_5)\r\n    color_list.append(upper_2_5)\r\n    dict['2_5'] = color_list\r\n\r\n    # 457 吐蕃\r\n    lower_2_15 = array([33, 80, 114])\r\n    upper_2_15 = array([48, 135, 200])\r\n    color_list = []\r\n    color_list.append(lower_2_15)\r\n    color_list.append(upper_2_15)\r\n    dict['2_15'] = color_list\r\n\r\n    # 黄绿色 -色那-1210\r\n    lower_2_6 = array([28, 175, 150])\r\n    upper_2_6 = array([38, 230, 215])\r\n    color_list = []\r\n    color_list.append(lower_2_6)\r\n    color_list.append(upper_2_6)\r\n    dict['2_6'] = color_list\r\n\r\n    # 深绿色 --卡拉丘里 赵-457\r\n    lower_2_7 = array([43, 135, 80])\r\n    upper_2_7 = array([60, 220, 140])\r\n    color_list = []\r\n    color_list.append(lower_2_7)\r\n    color_list.append(upper_2_7)\r\n    dict['2_7'] = color_list\r\n\r\n    # 青绿色 蒙古 -1120\r\n    lower_2_8 = array([43, 145, 60])\r\n    upper_2_8 = array([63, 255, 255])\r\n    color_list = []\r\n    color_list.append(lower_2_8)\r\n    color_list.append(upper_2_8)\r\n    dict['2_8'] = color_list\r\n\r\n    lower_2_17 = array([40, 170, 140])\r\n    upper_2_17 = array([60, 255, 230])\r\n    color_list = []\r\n    color_list.append(lower_2_17)\r\n    color_list.append(upper_2_17)\r\n    dict['2_17'] = color_list\r\n\r\n    # 淡绿色 -高丽\r\n    lower_2_9 = array([35, 95, 145])\r\n    upper_2_9 = array([60, 155, 225])\r\n    color_list = []\r\n    color_list.append(lower_2_9)\r\n    color_list.append(upper_2_9)\r\n    dict['2_9'] = color_list\r\n\r\n    lower_2_16 = array([43, 110, 75])\r\n    upper_2_16 = array([65, 185, 255])\r\n    color_list = []\r\n    color_list.append(lower_2_16)\r\n    color_list.append(upper_2_16)\r\n    dict['2_16'] = color_list\r\n\r\n\r\n    # 桔色 14 花剌子模\r\n    lower_2_10 = array([9, 150, 90])\r\n    upper_2_10 = array([20, 255, 225])\r\n    color_list = []\r\n    color_list.append(lower_2_10)\r\n    color_list.append(upper_2_10)\r\n    dict['2_10'] = color_list\r\n\r\n    # 14 *离\r\n    lower_2_12 = array([49, 15, 165])\r\n    upper_2_12 = array([72, 65, 220])\r\n    color_list = []\r\n    color_list.append(lower_2_12)\r\n    color_list.append(upper_2_12)\r\n    dict['2_12'] = color_list\r\n\r\n    lower_2_25 = array([34, 70, 110])\r\n    upper_2_25 = array([60, 200, 210])\r\n    color_list = []\r\n    color_list.append(lower_2_25)\r\n    color_list.append(upper_2_25)\r\n    dict['2_25'] = color_list\r\n\r\n    # -110 乌孙\r\n    lower_2_19 = array([55, 73, 115])\r\n    upper_2_19 = array([73, 185, 225])\r\n    color_list = []\r\n    color_list.append(lower_2_19)\r\n    color_list.append(upper_2_19)\r\n    dict['2_19'] = color_list\r\n\r\n    # 14乌桓\r\n    lower_2_23 = array([48, 95, 95])\r\n    upper_2_23 = array([65, 148, 230])\r\n    color_list = []\r\n    color_list.append(lower_2_23)\r\n    color_list.append(upper_2_23)\r\n    dict['2_23'] = color_list\r\n\r\n    # -110 安息\r\n    lower_2_20 = array([60, 88, 84])\r\n    upper_2_20 = array([78, 197, 170])\r\n    color_list = []\r\n    color_list.append(lower_2_20)\r\n    color_list.append(upper_2_20)\r\n    dict['2_20'] = color_list\r\n    # 3 大理 粉白\r\n    lower_3_1 = array([50, 20, 145])\r\n    upper_3_1 = array([70, 60, 215])\r\n    color_list = []\r\n    color_list.append(lower_3_1)\r\n    color_list.append(upper_3_1)\r\n    dict['3_1'] = color_list\r\n\r\n    # 蓝绿色 伊巴德派-1120\r\n    lower_3_2 = array([68, 120, 150])\r\n    upper_3_2 = array([76, 190, 255])\r\n    color_list = []\r\n    color_list.append(lower_3_2)\r\n    color_list.append(upper_3_2)\r\n    dict['3_2'] = color_list\r\n\r\n    # 河流色-墨绿\r\n    lower_3_3 = array([67, 190, 170])\r\n    upper_3_3 = array([75, 235, 190])\r\n    color_list = []\r\n    color_list.append(lower_3_3)\r\n    color_list.append(upper_3_3)\r\n    dict['3_3'] = color_list\r\n\r\n    # 14印度 提帕亚\r\n    lower_3_5 = array([62, 80, 155])\r\n    upper_3_5 = array([80, 180, 255])\r\n    color_list = []\r\n    color_list.append(lower_3_5)\r\n    color_list.append(upper_3_5)\r\n    dict['3_5'] = color_list\r\n\r\n    # 457 乌落侯\r\n    lower_3_9 = array([69, 100, 80])\r\n    upper_3_9 = array([80, 255, 135])\r\n    color_list = []\r\n    color_list.append(lower_3_9)\r\n    color_list.append(upper_3_9)\r\n    dict['3_9'] = color_list\r\n\r\n    # 457 契丹\r\n    lower_3_10 = array([48, 170, 110])\r\n    upper_3_10 = array([66, 255, 165])\r\n    color_list = []\r\n    color_list.append(lower_3_10)\r\n    color_list.append(upper_3_10)\r\n    dict['3_10'] = color_list\r\n\r\n    # 243\r\n    lower_3_8 = array([47, 76, 73])\r\n    upper_3_8 = array([76, 238, 150])\r\n    color_list = []\r\n    color_list.append(lower_3_8)\r\n    color_list.append(upper_3_8)\r\n    dict['3_8'] = color_list\r\n\r\n    # 457 柔然\r\n    lower_3_7 = array([68, 100, 140])\r\n    upper_3_7 = array([88, 255, 255])\r\n    color_list = []\r\n    color_list.append(lower_3_7)\r\n    color_list.append(upper_3_7)\r\n    dict['3_7'] = color_list\r\n\r\n    # 安息 14\r\n    lower_3_6 = array([55, 35, 80])\r\n    upper_3_6 = array([80, 170, 145])\r\n    color_list = []\r\n    color_list.append(lower_3_6)\r\n    color_list.append(upper_3_6)\r\n    dict['3_6'] = color_list\r\n\r\n\r\n    #天蓝绿 --女王国-1120\r\n    lower_3_4 = array([77, 130, 150])\r\n    upper_3_4 = array([88, 255, 220])\r\n    color_list = []\r\n    color_list.append(lower_3_4)\r\n    color_list.append(upper_3_4)\r\n    dict['3_4'] = color_list\r\n\r\n\r\n    # 浅蓝 -西辽\r\n    lower_4_1 = array([90, 100, 135])\r\n    upper_4_1 = array([103, 255, 255])\r\n    color_list = []\r\n    color_list.append(lower_4_1)\r\n    color_list.append(upper_4_1)\r\n    dict['4_1'] = color_list\r\n\r\n    # 14 康居 天蓝\r\n    lower_14_2 = array([84, 110, 127])\r\n    upper_14_2 = array([100, 255, 200])\r\n    color_list = []\r\n    color_list.append(lower_14_2)\r\n    color_list.append(upper_14_2)\r\n    dict['14_2'] = color_list\r\n\r\n    # 深蓝-屈出律\r\n    lower_4_8 = array([90, 70, 0])\r\n    upper_4_8 = array([103, 255, 130])\r\n    color_list = []\r\n    color_list.append(lower_4_8)\r\n    color_list.append(upper_4_8)\r\n    dict['4_8'] = color_list\r\n\r\n    # 更深蓝 1120 海蓝\r\n    lower_4_2 = array([100, 130, 130])\r\n    upper_4_2 = array([117, 255, 190])\r\n    color_list = []\r\n    color_list.append(lower_4_2)\r\n    color_list.append(upper_4_2)\r\n    dict['4_2'] = color_list\r\n\r\n    # 396 贵霜\r\n    lower_4_11 = array([92, 85, 85])\r\n    upper_4_11 = array([127, 190, 194])\r\n    color_list = []\r\n    color_list.append(lower_4_11)\r\n    color_list.append(upper_4_11)\r\n    dict['4_11'] = color_list\r\n\r\n    # 757 吐蕃\r\n    lower_4_10 = array([108, 100, 105])\r\n    upper_4_10 = array([129, 230, 240])\r\n    color_list = []\r\n    color_list.append(lower_4_10)\r\n    color_list.append(upper_4_10)\r\n    dict['4_10'] = color_list\r\n\r\n    # 紫色 西夏 1120\r\n    lower_4_3 = array([125, 105, 125])\r\n    upper_4_3 = array([145, 230, 230])\r\n    color_list = []\r\n    color_list.append(lower_4_3)\r\n    color_list.append(upper_4_3)\r\n    dict['4_3'] = color_list\r\n\r\n    # 浅紫色 日本\r\n    lower_4_4 = array([110, 15, 100])\r\n    upper_4_4 = array([140, 100, 200])\r\n    color_list = []\r\n    color_list.append(lower_4_4)\r\n    color_list.append(upper_4_4)\r\n    dict['4_4'] = color_list\r\n\r\n    # 深紫色 拉塔 1120\r\n    lower_4_5 = array([146, 80, 80])\r\n    upper_4_5 = array([170, 200, 200])\r\n    color_list = []\r\n    color_list.append(lower_4_5)\r\n    color_list.append(upper_4_5)\r\n    dict['4_5'] = color_list\r\n\r\n    # 深红 德里苏丹 1120\r\n    lower_4_6 = array([170, 100, 125])\r\n    upper_4_6 = array([180, 195, 255])\r\n    color_list = []\r\n    color_list.append(lower_4_6)\r\n    color_list.append(upper_4_6)\r\n    dict['4_6'] = color_list\r\n\r\n    # 红 雅达瓦\r\n    lower_4_7 = array([170, 45, 125])\r\n    upper_4_7 = array([180, 100, 205])\r\n    color_list = []\r\n    color_list.append(lower_4_7)\r\n    color_list.append(upper_4_7)\r\n    dict['4_7'] = color_list\r\n\r\n    # 457 悦般\r\n    lower_4_9 = array([160, 125, 125])\r\n    upper_4_9 = array([180, 225, 255])\r\n    color_list = []\r\n    color_list.append(lower_4_9)\r\n    color_list.append(upper_4_9)\r\n    dict['4_9'] = color_list\r\n\r\n    return dict
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pyqt5/color_list.py	(revision 18555c02cfa188ddd11f1e941b7d74ec6489df5c)
++++ pyqt5/color_list.py	(date 1587524855554)
+@@ -9,12 +9,13 @@
+ from collections import defaultdict
+ from numpy import array
+ 
++
+ def get_corlor_list():
+     dict = defaultdict(list)
+ 
+     # 1 red_红色
+     lower_1_1 = array([0, 160, 130])
+-    upper_1_1= array([9, 255, 255])
++    upper_1_1 = array([9, 255, 255])
+     color_list = []
+     color_list.append(lower_1_1)
+     color_list.append(upper_1_1)
+@@ -28,7 +29,7 @@
+     color_list.append(upper_1_2)
+     dict['1_2'] = color_list
+ 
+-    #瓦纳斯 ——1172 褐红
++    # 瓦纳斯 ——1172 褐红
+     lower_1_3 = array([0, 160, 90])
+     upper_1_3 = array([9, 200, 130])
+     color_list = []
+@@ -36,7 +37,6 @@
+     color_list.append(upper_1_3)
+     dict['1_3'] = color_list
+ 
+-
+     # 渤海 757 红
+     lower_1_4 = array([6, 90, 125])
+     upper_1_4 = array([14, 145, 190])
+@@ -71,7 +71,7 @@
+ 
+     # 瓦纳斯 ——1172 褐红
+     lower_1_6 = array([0, 144, 40])
+-    upper_1_6 = array([20,255 , 140])
++    upper_1_6 = array([20, 255, 140])
+     color_list = []
+     color_list.append(lower_1_6)
+     color_list.append(upper_1_6)
+@@ -115,7 +115,6 @@
+     color_list.append(upper_2_18)
+     dict['2_18'] = color_list
+ 
+-
+     # 457 蕨达
+     lower_2_13 = array([8, 0, 140])
+     upper_2_13 = array([63, 60, 255])
+@@ -149,7 +148,7 @@
+     dict['2_3'] = color_list
+ 
+     # 淡绿色--帕拉玛拉-1210
+-    lower_2_4= array([25, 120, 150])
++    lower_2_4 = array([25, 120, 150])
+     upper_2_4 = array([35, 145, 200])
+     color_list = []
+     color_list.append(lower_2_4)
+@@ -232,7 +231,6 @@
+     color_list.append(upper_2_16)
+     dict['2_16'] = color_list
+ 
+-
+     # 桔色 14 花剌子模
+     lower_2_10 = array([9, 150, 90])
+     upper_2_10 = array([20, 255, 225])
+@@ -351,8 +349,7 @@
+     color_list.append(upper_3_6)
+     dict['3_6'] = color_list
+ 
+-
+-    #天蓝绿 --女王国-1120
++    # 天蓝绿 --女王国-1120
+     lower_3_4 = array([77, 130, 150])
+     upper_3_4 = array([88, 255, 220])
+     color_list = []
+@@ -360,7 +357,6 @@
+     color_list.append(upper_3_4)
+     dict['3_4'] = color_list
+ 
+-
+     # 浅蓝 -西辽
+     lower_4_1 = array([90, 100, 135])
+     upper_4_1 = array([103, 255, 255])
+@@ -457,4 +453,4 @@
+     color_list.append(upper_4_9)
+     dict['4_9'] = color_list
+ 
+-    return dict
+\ No newline at end of file
++    return dict
+Index: findContour.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- findContour.py	(date 1587524855526)
++++ findContour.py	(date 1587524855526)
+@@ -0,0 +1,20 @@
++import cv2
++
++if __name__ == '__main__':
++    img = cv2.imread('D:\\Workplace\\prep_map\\test.jpg')
++    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
++    ret, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
++    img, contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
++    print(len(contours),type(contours))
++    print(type(contours[0]))
++    print(len(contours[0]))
++    print(len(contours[1]))
++    print(type(img))
++    #cv2.drawContours(img, contours, -1, (0, 0, 255), 3)
++
++    # cv2.imshow("binary", binary)
++    # img, contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
++    # cv2.imshow("binary2", binary)
++
++    # cv2.imshow("img", img)
++    #cv2.waitKey(0)
+diff --git .idea/other.xml .idea/other.xml
+new file mode 100644

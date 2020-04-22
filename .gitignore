@@ -1,0 +1,5 @@
+pyqt5/build/*
+pyqt5/dist/*
+time_format/build/*
+time_format/dist/*
+time_format/img/*

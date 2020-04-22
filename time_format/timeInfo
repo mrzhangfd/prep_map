@@ -1,0 +1,470 @@
+[
+  {
+  "id": 10000,
+  "dynasty": "明",
+  "dy_start": 1368,
+  "dy_end": 1644,
+  "children":[
+    {
+      "id": 10100,
+      "reignTitle": "洪武",
+      "children": [
+        {
+          "id": 10110,
+          "start": 1368,
+          "end": 1398,
+          "leaf": true
+        }
+      ]
+    },
+    {
+      "id":10200,
+      "reignTitle": "建文",
+      "children":[
+        {
+          "id":10210,
+          "start": 1399,
+          "end":1402,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":10300,
+      "reignTitle": "永乐",
+      "children":[
+        {
+          "id":10310,
+          "start": 1403,
+          "end":1424,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":10400,
+      "reignTitle": "洪熙",
+      "children":[
+        {
+          "id":10410,
+          "start": 1425,
+          "end":1425,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":10500,
+      "reignTitle": "宣德",
+      "children":[
+        {
+          "id":10510,
+          "start": 1426,
+          "end":1435,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":10600,
+      "reignTitle": "正统",
+      "children":[
+        {
+          "id":10610,
+          "start": 1436,
+          "end":1449,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":10700,
+      "reignTitle": "景泰",
+      "children":[
+        {
+          "id":10710,
+          "start": 1450,
+          "end":1457,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":10800,
+      "reignTitle": "天顺",
+      "children":[
+        {
+          "id":10810,
+          "start": 1457,
+          "end":1464,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":10900,
+      "reignTitle": "成化",
+      "children":[
+        {
+          "id":10910,
+          "start": 1465,
+          "end":1487,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11000,
+      "reignTitle": "弘治",
+      "children":[
+        {
+          "id":11010,
+          "start": 1488,
+          "end":1505,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11100,
+      "reignTitle": "正德",
+      "children":[
+        {
+          "id":11110,
+          "start": 1506,
+          "end":1521,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11200,
+      "reignTitle": "嘉靖",
+      "children":[
+        {
+          "id":11210,
+          "start": 1522,
+          "end":1566,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11300,
+      "reignTitle": "隆庆",
+      "children":[
+        {
+          "id":11310,
+          "start": 1567,
+          "end":1572,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11400,
+      "reignTitle": "万历",
+      "children":[
+        {
+          "id":11410,
+          "start": 1573,
+          "end":1620,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11500,
+      "reignTitle": "泰昌",
+      "children":[
+        {
+          "id":11510,
+          "start": 1620,
+          "end":1620,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11600,
+      "reignTitle": "天启",
+      "children":[
+        {
+          "id":11610,
+          "start": 1621,
+          "end":1627,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":11700,
+      "reignTitle": "崇祯",
+      "children":[
+        {
+          "id":11710,
+          "start": 1628,
+          "end":1644,
+          "leaf":true
+        }
+      ]
+    }
+  ]
+  },
+  {
+  "id": 20000,
+  "dynasty": "清",
+  "dy_start": 1645,
+  "dy_end": 1911,
+  "children":[
+    {
+      "id": 20100,
+      "reignTitle": "顺治",
+      "children": [
+        {
+          "id": 20110,
+          "start": 1645,
+          "end": 1661,
+          "leaf": true
+        }
+      ]
+    },
+    {
+      "id":20200,
+      "reignTitle": "康熙",
+      "children":[
+        {
+          "id":20210,
+          "start": 1662,
+          "end":1722,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":20300,
+      "reignTitle": "雍正",
+      "children":[
+        {
+          "id":20310,
+          "start": 1723,
+          "end":1735,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":20400,
+      "reignTitle": "乾隆",
+      "children":[
+        {
+          "id":20410,
+          "start": 1736,
+          "end":1795,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":20500,
+      "reignTitle": "嘉庆",
+      "children":[
+        {
+          "id":20510,
+          "start": 1796,
+          "end":1820,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":20600,
+      "reignTitle": "道光",
+      "children":[
+        {
+          "id":20610,
+          "start": 1821,
+          "end":1850,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":20700,
+      "reignTitle": "咸丰",
+      "children":[
+        {
+          "id":20710,
+          "start": 1851,
+          "end":1861,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":20800,
+      "reignTitle": "同治",
+      "children":[
+        {
+          "id":20810,
+          "start": 1862,
+          "end":1874,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":20900,
+      "reignTitle": "光绪",
+      "children":[
+        {
+          "id":20910,
+          "start": 1875,
+          "end":1908,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":21000,
+      "reignTitle": "宣统",
+      "children":[
+        {
+          "id":21010,
+          "start": 1909,
+          "end":1911,
+          "leaf":true
+        }
+      ]
+    }
+  ]
+},
+{
+  "id": 30000,
+  "dynasty": "东汉",
+  "dy_start": 25,
+  "dy_end": 220,
+  "children":[
+    {
+      "id": 30100,
+      "reignTitle": "建武",
+      "children": [
+        {
+          "id": 30110,
+          "start": 25,
+          "end": 56,
+          "leaf": true
+        }
+      ]
+    },
+    {
+      "id":30200,
+      "reignTitle": "建武中元",
+      "children":[
+        {
+          "id":30210,
+          "start": 57,
+          "end":57,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":30300,
+      "reignTitle": "永平",
+      "children":[
+        {
+          "id":30310,
+          "start": 58,
+          "end":75,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":30400,
+      "reignTitle": "建初",
+      "children":[
+        {
+          "id":30410,
+          "start": 76,
+          "end":84,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":30500,
+      "reignTitle": "元和",
+      "children":[
+        {
+          "id":30510,
+          "start": 85,
+          "end":87,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":30600,
+      "reignTitle": "章和",
+      "children":[
+        {
+          "id":30610,
+          "start": 88,
+          "end":88,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":30700,
+      "reignTitle": "永元",
+      "children":[
+        {
+          "id":30710,
+          "start": 89,
+          "end":104,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":30800,
+      "reignTitle": "元兴",
+      "children":[
+        {
+          "id":30810,
+          "start":105,
+          "end":105,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":30900,
+      "reignTitle": "延平",
+      "children":[
+        {
+          "id":30910,
+          "start": 106,
+          "end":106,
+          "leaf":true
+        }
+      ]
+    },
+    {
+      "id":31000,
+      "reignTitle": "永初",
+      "children":[
+        {
+          "id":31010,
+          "start": 107,
+          "end":113,
+          "leaf":true
+        }
+      ]
+    }
+  ]
+}
+]

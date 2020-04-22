@@ -11,7 +11,7 @@ if __name__ == '__main__':
     print(len(contours[1]))
     print(type(img))
     #cv2.drawContours(img, contours, -1, (0, 0, 255), 3)
-
+    ##test
     # cv2.imshow("binary", binary)
     # img, contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # cv2.imshow("binary2", binary)

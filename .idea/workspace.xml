@@ -217,6 +217,7 @@
       <workItem from="1587525182685" duration="3665000" />
       <workItem from="1587529053080" duration="2448000" />
       <workItem from="1587553699209" duration="819000" />
+      <workItem from="1587554836059" duration="345000" />
     </task>
     <servers />
   </component>
@@ -249,6 +250,11 @@
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$" />
+    </ignored-roots>
+  </component>
   <component name="WindowStateProjectService">
     <state x="522" y="202" key="#Notifications" timestamp="1587525314558">
       <screen x="0" y="0" width="1280" height="680" />
@@ -262,10 +268,10 @@
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="509" y="237" key="Github.ShareDialog/0.0.1280.680@0.0.1280.680" timestamp="1587554051331" />
-    <state x="141" y="0" key="SettingsEditor" timestamp="1587554426679">
+    <state x="141" y="0" key="SettingsEditor" timestamp="1587554911737">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="141" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1587554426679" />
+    <state x="141" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1587554911737" />
     <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1587526446561">
       <screen x="0" y="0" width="1280" height="680" />
     </state>

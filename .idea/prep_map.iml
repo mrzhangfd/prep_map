@@ -5,12 +5,12 @@
       <sourceFolder url="file://$MODULE_DIR$/pre_map" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/pyqt5" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/time_format" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/map_rele" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
-    <option name="projectConfiguration" value="Nosetests" />
     <option name="PROJECT_TEST_RUNNER" value="Nosetests" />
   </component>
 </module>

@@ -15,7 +15,30 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c0575a98-53e5-45c3-9218-c4728f863853" name="Default Changelist" comment="" />
+    <list default="true" id="c0575a98-53e5-45c3-9218-c4728f863853" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/map_rele/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/baidu_ocr.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/color_list.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/image/clickIcon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/image/contour_name.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/image/dragIcon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/image/site.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/image/year.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/img2.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/mysql_conn.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/password.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/photo_viewer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/photo_window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/photo_window.spec" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/pyqt5.spec" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/map_rele/rele_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/prep_map.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/prep_map.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2020_4_22_11_09_[Default_Changelist]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2020_4_22_11_09__Default_Changelist_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyqt5/image/contour_name.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/pyqt5/image/contour_name.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyqt5/image/year.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/pyqt5/image/year.jpg" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,15 +51,6 @@
       </list>
     </option>
   </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>findco</find>
-      <find>loads</find>
-      <find>原</find>
-      <find>永平</find>
-      <find>nianhao</find>
-    </findStrings>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -46,24 +60,27 @@
     </option>
   </component>
   <component name="ProjectId" id="1TyWpLQnetDKkzwu1twAGwfsBn2" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Workplace\prep_map" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.photo_window">
+  <component name="RunManager" selected="Python.rele_window">
     <configuration name="findContour" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="prep_map" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -86,7 +103,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="photo_viewer_time" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="photo_window (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="prep_map" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -94,14 +111,14 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/time_format" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/map_rele" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/time_format/photo_viewer_time.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/map_rele/photo_window.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
@@ -130,7 +147,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="setup" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="rele_window" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="prep_map" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -138,14 +155,14 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/map_rele" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/setup.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/map_rele/rele_window.py" />
       <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
@@ -176,11 +193,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.rele_window" />
+        <item itemvalue="Python.photo_window (1)" />
         <item itemvalue="Python.photo_window" />
         <item itemvalue="Python.time_window" />
         <item itemvalue="Python.findContour" />
-        <item itemvalue="Python.photo_viewer_time" />
-        <item itemvalue="Python.setup" />
       </list>
     </recent_temporary>
   </component>
@@ -218,6 +235,9 @@
       <workItem from="1587529053080" duration="2448000" />
       <workItem from="1587553699209" duration="819000" />
       <workItem from="1587554836059" duration="478000" />
+      <workItem from="1587555332410" duration="420000" />
+      <workItem from="1589343762008" duration="21000" />
+      <workItem from="1589343815526" duration="29057000" />
     </task>
     <servers />
   </component>
@@ -251,6 +271,7 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <ignored-roots>
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
@@ -264,18 +285,54 @@
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="320" y="75" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1280.680@0.0.1280.680" timestamp="1587457538739" />
+    <state x="370" y="86" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1587555363950">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="370" y="86" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1280.680@0.0.1280.680" timestamp="1587555363950" />
     <state x="509" y="237" key="Github.ShareDialog" timestamp="1587554051331">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="509" y="237" key="Github.ShareDialog/0.0.1280.680@0.0.1280.680" timestamp="1587554051331" />
-    <state x="141" y="0" key="SettingsEditor" timestamp="1587554911737">
+    <state width="1237" height="74" key="GridCell.Tab.0.bottom" timestamp="1589418537076">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="141" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1587554911737" />
-    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1587526446561">
+    <state width="1237" height="74" key="GridCell.Tab.0.bottom/0.0.1280.680@0.0.1280.680" timestamp="1589418537076" />
+    <state width="1237" height="74" key="GridCell.Tab.0.center" timestamp="1589418537076">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup/0.0.1280.680@0.0.1280.680" timestamp="1587526446561" />
+    <state width="1237" height="74" key="GridCell.Tab.0.center/0.0.1280.680@0.0.1280.680" timestamp="1589418537076" />
+    <state width="1237" height="74" key="GridCell.Tab.0.left" timestamp="1589418537075">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="74" key="GridCell.Tab.0.left/0.0.1280.680@0.0.1280.680" timestamp="1589418537075" />
+    <state width="1237" height="74" key="GridCell.Tab.0.right" timestamp="1589418537076">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="74" key="GridCell.Tab.0.right/0.0.1280.680@0.0.1280.680" timestamp="1589418537076" />
+    <state width="1237" height="79" key="GridCell.Tab.1.bottom" timestamp="1589355991986">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.1.bottom/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
+    <state width="1237" height="79" key="GridCell.Tab.1.center" timestamp="1589355991986">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.1.center/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
+    <state width="1237" height="79" key="GridCell.Tab.1.left" timestamp="1589355991986">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.1.left/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
+    <state width="1237" height="79" key="GridCell.Tab.1.right" timestamp="1589355991986">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
+    <state x="141" y="0" key="SettingsEditor" timestamp="1589352970466">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="141" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1589352970466" />
+    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup" timestamp="1589354846796">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="303" y="1" width="672" height="678" key="search.everywhere.popup/0.0.1280.680@0.0.1280.680" timestamp="1589354846796" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -300,12 +357,24 @@
           <line>207</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/map_rele/rele_window.py</url>
+          <line>267</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/map_rele/rele_window.py</url>
+          <line>254</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/prep_map$time_window.coverage" NAME="time_window Coverage Results" MODIFIED="1573541648811" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_format" />
-    <SUITE FILE_PATH="coverage/prep_map$photo_window.coverage" NAME="photo_window Coverage Results" MODIFIED="1587458054025" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pyqt5" />
+    <SUITE FILE_PATH="coverage/prep_map$rele_window.coverage" NAME="rele_window Coverage Results" MODIFIED="1589418537057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/map_rele" />
+    <SUITE FILE_PATH="coverage/prep_map$photo_window.coverage" NAME="photo_window Coverage Results" MODIFIED="1589376000937" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pyqt5" />
     <SUITE FILE_PATH="coverage/prep_map$findContour.coverage" NAME="findContour Coverage Results" MODIFIED="1573027867182" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/prep_map$photo_window__1_.coverage" NAME="photo_window (1) Coverage Results" MODIFIED="1589385099575" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/map_rele" />
   </component>
 </project>

@@ -6,38 +6,12 @@
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
         <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
       </path>
-      <path>
-        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="GROUP_NODE:hotfix" type="e8cecc67:BranchNodeDescriptor" />
-      </path>
     </expand>
     <select />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c0575a98-53e5-45c3-9218-c4728f863853" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/map_rele/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/baidu_ocr.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/color_list.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/image/clickIcon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/image/contour_name.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/image/dragIcon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/image/site.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/image/year.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/img2.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/mysql_conn.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/password.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/photo_viewer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/photo_window.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/photo_window.spec" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/pyqt5.spec" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/map_rele/rele_window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/prep_map.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/prep_map.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2020_4_22_11_09_[Default_Changelist]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2020_4_22_11_09__Default_Changelist_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyqt5/image/contour_name.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/pyqt5/image/contour_name.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyqt5/image/year.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/pyqt5/image/year.jpg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +33,13 @@
       </map>
     </option>
   </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="hiddenUrls">
+      <set>
+        <option value="https://github.com/mrzhangfd/prep_map.git" />
+      </set>
+    </option>
+  </component>
   <component name="ProjectId" id="1TyWpLQnetDKkzwu1twAGwfsBn2" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -69,6 +50,8 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -80,7 +63,7 @@
       <recent name="D:\Workplace\prep_map" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.rele_window">
+  <component name="RunManager" selected="Python.time_window">
     <configuration name="findContour" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="prep_map" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -193,10 +176,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.time_window" />
         <item itemvalue="Python.rele_window" />
         <item itemvalue="Python.photo_window (1)" />
         <item itemvalue="Python.photo_window" />
-        <item itemvalue="Python.time_window" />
         <item itemvalue="Python.findContour" />
       </list>
     </recent_temporary>
@@ -237,7 +220,12 @@
       <workItem from="1587554836059" duration="478000" />
       <workItem from="1587555332410" duration="420000" />
       <workItem from="1589343762008" duration="21000" />
-      <workItem from="1589343815526" duration="29057000" />
+      <workItem from="1589343815526" duration="29929000" />
+      <workItem from="1589615449623" duration="196000" />
+      <workItem from="1589616200285" duration="889000" />
+      <workItem from="1594255871111" duration="11000" />
+      <workItem from="1594255943887" duration="1720000" />
+      <workItem from="1594261671320" duration="1173000" />
     </task>
     <servers />
   </component>
@@ -293,38 +281,42 @@
       <screen x="0" y="0" width="1280" height="680" />
     </state>
     <state x="509" y="237" key="Github.ShareDialog/0.0.1280.680@0.0.1280.680" timestamp="1587554051331" />
-    <state width="1237" height="74" key="GridCell.Tab.0.bottom" timestamp="1589418537076">
+    <state width="2517" height="200" key="GridCell.Tab.0.bottom" timestamp="1594261611730">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.0.bottom/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
+    <state width="2517" height="200" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1594261611730" />
+    <state width="2517" height="200" key="GridCell.Tab.0.center" timestamp="1594261611730">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.0.center/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
+    <state width="2517" height="200" key="GridCell.Tab.0.center/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1594261611730" />
+    <state width="2517" height="200" key="GridCell.Tab.0.left" timestamp="1594261611730">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.0.left/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
+    <state width="2517" height="200" key="GridCell.Tab.0.left/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1594261611730" />
+    <state width="2517" height="200" key="GridCell.Tab.0.right" timestamp="1594261611730">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state width="1237" height="79" key="GridCell.Tab.0.right/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
+    <state width="2517" height="200" key="GridCell.Tab.0.right/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1594261611730" />
+    <state width="1237" height="79" key="GridCell.Tab.1.bottom" timestamp="1589470162998">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state width="1237" height="74" key="GridCell.Tab.0.bottom/0.0.1280.680@0.0.1280.680" timestamp="1589418537076" />
-    <state width="1237" height="74" key="GridCell.Tab.0.center" timestamp="1589418537076">
+    <state width="1237" height="79" key="GridCell.Tab.1.bottom/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
+    <state width="1237" height="79" key="GridCell.Tab.1.center" timestamp="1589470162998">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state width="1237" height="74" key="GridCell.Tab.0.center/0.0.1280.680@0.0.1280.680" timestamp="1589418537076" />
-    <state width="1237" height="74" key="GridCell.Tab.0.left" timestamp="1589418537075">
+    <state width="1237" height="79" key="GridCell.Tab.1.center/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
+    <state width="1237" height="79" key="GridCell.Tab.1.left" timestamp="1589470162998">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state width="1237" height="74" key="GridCell.Tab.0.left/0.0.1280.680@0.0.1280.680" timestamp="1589418537075" />
-    <state width="1237" height="74" key="GridCell.Tab.0.right" timestamp="1589418537076">
+    <state width="1237" height="79" key="GridCell.Tab.1.left/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
+    <state width="1237" height="79" key="GridCell.Tab.1.right" timestamp="1589470162998">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
-    <state width="1237" height="74" key="GridCell.Tab.0.right/0.0.1280.680@0.0.1280.680" timestamp="1589418537076" />
-    <state width="1237" height="79" key="GridCell.Tab.1.bottom" timestamp="1589355991986">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="79" key="GridCell.Tab.1.bottom/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
-    <state width="1237" height="79" key="GridCell.Tab.1.center" timestamp="1589355991986">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="79" key="GridCell.Tab.1.center/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
-    <state width="1237" height="79" key="GridCell.Tab.1.left" timestamp="1589355991986">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="79" key="GridCell.Tab.1.left/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
-    <state width="1237" height="79" key="GridCell.Tab.1.right" timestamp="1589355991986">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="1237" height="79" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1589355991986" />
+    <state width="1237" height="79" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1589470162998" />
     <state x="141" y="0" key="SettingsEditor" timestamp="1589352970466">
       <screen x="0" y="0" width="1280" height="680" />
     </state>
@@ -371,8 +363,8 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/prep_map$time_window.coverage" NAME="time_window Coverage Results" MODIFIED="1573541648811" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_format" />
     <SUITE FILE_PATH="coverage/prep_map$rele_window.coverage" NAME="rele_window Coverage Results" MODIFIED="1589418537057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/map_rele" />
+    <SUITE FILE_PATH="coverage/prep_map$time_window.coverage" NAME="time_window Coverage Results" MODIFIED="1594256271344" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_format" />
     <SUITE FILE_PATH="coverage/prep_map$photo_window.coverage" NAME="photo_window Coverage Results" MODIFIED="1589376000937" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pyqt5" />
     <SUITE FILE_PATH="coverage/prep_map$findContour.coverage" NAME="findContour Coverage Results" MODIFIED="1573027867182" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/prep_map$photo_window__1_.coverage" NAME="photo_window (1) Coverage Results" MODIFIED="1589385099575" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/map_rele" />
